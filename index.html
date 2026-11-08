@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شركة نايف للأغذية - نظام إدارة الشكاوى والتقارير المتقدم</title>
+    <title>شكاوى</title>
+    <!-- iPhone / iPad: Add to Home Screen -->
+    <meta name="apple-mobile-web-app-title" content="شكاوى">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#991b1b">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg">
     <link rel="icon" href="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" type="image/jpeg">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -89,8 +95,6 @@
             line-height: 1.4 !important;
         }
 
-
-        /* PDF export: preserve column widths and wrap long Arabic text naturally. */
         .pdf-table { table-layout: auto; }
         .pdf-table th, .pdf-table td {
             white-space: normal;
@@ -217,11 +221,11 @@
                     <div>
                         <label class="text-xs font-bold text-slate-500 block mb-1">اختر التقرير المطلوب</label>
                         <select id="reportSelect" onchange="renderActiveReport()" class="border border-slate-300 rounded-lg p-2 text-sm font-semibold bg-slate-50 text-slate-800">
-                            <option value="rep1">1. تقرير الشكاوى اليومية وتراكمي المشرفين (مطابق للصورة)</option>
-                            <option value="rep_daily_full">2. تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص (ملون)</option>
+                            <option value="rep1">1. تقرير الشكاوى اليومية وتراكمي المشرفين</option>
+                            <option value="rep_daily_full">2. تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص</option>
                             <option value="rep2">3. تقرير إجمالي أنواع الشكاوى (تمييز الأعلى والأقل)</option>
                             <option value="rep3">4. التقرير اليومي الشامل لمشرفي الشهر (Landscape - صفحة واحدة)</option>
-                            <option value="rep_matrix_branches">5. تقرير مصفوفة المطاعم وأيام الشهر (33 مطعم لكل صفحة - أرقام الأيام)</option>
+                            <option value="rep_matrix_branches">5. تقرير مصفوفة المطاعم وأيام الشهر</option>
                             <option value="rep_ops_tb">6. تقرير مدير التشغيل: طارق بيومي</option>
                             <option value="rep_ops_hy">7. تقرير مدير التشغيل: هاني عبدالله</option>
                             <option value="rep4">8. تقرير الأفرع الأكثر تضرراً من الشكاوى</option>
@@ -261,9 +265,10 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="text-xs font-bold text-slate-600">فلتر الفترة:</span>
-                    <input type="date" id="list_from" onchange="renderComplaintsList()" class="border border-slate-300 rounded p-1 text-xs">
+                    <input type="date" id="list_from" class="border border-slate-300 rounded p-1 text-xs">
                     <span class="text-xs">إلى</span>
-                    <input type="date" id="list_to" onchange="renderComplaintsList()" class="border border-slate-300 rounded p-1 text-xs">
+                    <input type="date" id="list_to" class="border border-slate-300 rounded p-1 text-xs">
+                    <button onclick="renderComplaintsList()" class="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 rounded text-xs font-bold shadow"><i class="fa-solid fa-filter ml-1"></i> إظهار الشكاوى</button>
                     <button onclick="resetListFilter()" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded text-xs font-bold">الكل</button>
                     <button onclick="exportComplaintsPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-3 py-1.5 rounded text-xs shadow flex items-center"><i class="fa-solid fa-file-pdf ml-1"></i> تصدير PDF</button>
                 </div>
@@ -292,16 +297,21 @@
         <section id="tab-audit" class="hidden bg-white rounded-xl shadow-md p-6">
             <div class="flex flex-wrap justify-between items-center border-b pb-3 mb-4 gap-2">
                 <h2 class="text-base font-bold text-slate-800 flex items-center">
-                    <i class="fa-solid fa-shield-halved text-red-600 ml-2"></i> سجل الحركات الشامل لجميع الأجهزة (محمي بكلمة المرور - لا يقبل الحذف)
+                    <i class="fa-solid fa-shield-halved text-red-600 ml-2"></i> سجل الحركات الشامل لجميع الأجهزة
                 </h2>
                 <div class="w-full md:w-72">
-                    <input type="text" id="auditSearch" onkeyup="renderAuditTable()" placeholder="بحث شامل في الحركات بالحرف..." class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+                    <div class="flex flex-wrap gap-2">
+                        <input type="text" id="auditSearch" onkeyup="renderAuditTable()" placeholder="بحث شامل في الحركات بالحرف..." class="border border-slate-300 rounded-lg p-2 text-xs flex-1">
+                        <button onclick="deleteSelectedAuditLogs()" class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-xs font-bold">حذف الحركات المحددة</button>
+                        <button onclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover:bg-slate-300 rounded-lg px-3 py-2 text-xs font-bold">تحديد الكل</button>
+                    </div>
                 </div>
             </div>
             <div class="overflow-x-auto max-h-[500px]">
                 <table class="w-full text-xs text-right border-collapse">
                     <thead class="bg-slate-800 text-white sticky top-0">
                         <tr>
+                            <th class="p-2.5">اختيار</th>
                             <th class="p-2.5">م</th>
                             <th class="p-2.5">التاريخ والوقت</th>
                             <th class="p-2.5">نوع الحركة</th>
@@ -316,7 +326,7 @@
         <!-- TAB 5: SETTINGS -->
         <section id="tab-settings" class="hidden bg-white rounded-xl shadow-md p-6 space-y-6">
             <h2 class="text-base font-bold text-slate-800 border-b pb-3 flex items-center">
-                <i class="fa-solid fa-sliders text-red-600 ml-2"></i> الإعدادات المتقدمة وإدارة المشرفين وأنواع الشكاوى (محمي بكلمة المرور 123321)
+                <i class="fa-solid fa-sliders text-red-600 ml-2"></i> الإعدادات المتقدمة وإدارة المشرفين وأنواع الشكاوى
             </h2>
 
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
@@ -387,7 +397,7 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">قائمة الأفرع وتغيير المشرفين (محمي بكلمة المرور)</h3>
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">قائمة الأفرع وتغيير المشرفين</h3>
                     <div class="max-h-96 overflow-y-auto border border-slate-200 rounded-lg">
                         <table class="w-full text-xs text-right border-collapse">
                             <thead class="bg-slate-700 text-white sticky top-0">
@@ -610,11 +620,15 @@
 
         window.onload = function() {
             window.initAppUI();
-            const today = '2026-10-01';
-            document.getElementById('c_date').value = today;
-            document.getElementById('filter_date').value = today;
-            document.getElementById('filter_from').value = '2026-10-01';
-            document.getElementById('filter_to').value = '2026-10-31';
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            const monthStart = todayStr.slice(0, 8) + '01';
+            document.getElementById('c_date').value = todayStr;
+            document.getElementById('filter_date').value = todayStr;
+            document.getElementById('filter_from').value = monthStart;
+            document.getElementById('filter_to').value = todayStr;
+            document.getElementById('list_from').value = monthStart;
+            document.getElementById('list_to').value = todayStr;
 
             updateStats();
             renderComplaintsList();
@@ -739,10 +753,16 @@
             window.logAction('تسجيل شكوى', `تسجيل شكوى للفرع (${foundBranch.name}) بإشراف (${foundBranch.manager})`);
             updateStats();
             renderComplaintsList();
-            alert('تم تسجيل الشكوى وحفظها بنجاح!');
+            
+            alert('تم حفظ الشكوى بنجاح!');
 
+            // تفريغ النموذج بالكامل لمنع التكرار
             this.reset();
-            document.getElementById('c_date').value = new Date().toISOString().split('T')[0];
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            document.getElementById('c_date').value = todayStr;
+            document.getElementById('c_manager').value = '';
+            document.getElementById('c_ops').value = '';
         };
 
         function updateStats() {
@@ -781,12 +801,12 @@
                 tr.className = 'hover:bg-slate-100 transition';
                 tr.innerHTML = `
                     <td class="p-2.5 font-bold">${idx + 1}</td>
-                    <td class="p-2.5">${c.date}</td>
-                    <td class="p-2.5 font-semibold text-slate-800">${c.branch}</td>
-                    <td class="p-2.5 text-blue-900 font-bold">${c.manager}</td>
-                    <td class="p-2.5">${c.phone}</td>
-                    <td class="p-2.5 max-w-xs truncate">${c.details}</td>
-                    <td class="p-2.5">${c.types.map(t => `<span class="bg-red-50 text-red-700 text-xs px-1.5 py-0.5 rounded border border-red-200 ml-1">${t}</span>`).join('')}</td>
+                    <td class="p-2.5">${c.date || ''}</td>
+                    <td class="p-2.5 font-semibold text-slate-800">${c.branch || ''}</td>
+                    <td class="p-2.5 text-blue-900 font-bold">${c.manager || ''}</td>
+                    <td class="p-2.5">${c.phone || ''}</td>
+                    <td class="p-2.5 max-w-xs truncate">${c.details || ''}</td>
+                    <td class="p-2.5">${(c.types || []).map(t => `<span class="bg-red-50 text-red-700 text-xs px-1.5 py-0.5 rounded border border-red-200 ml-1">${t}</span>`).join('')}</td>
                     <td class="p-2.5 text-center space-x-2 space-x-reverse">
                         <button onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold"><i class="fa-solid fa-eye"></i></button>
                         <button onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold"><i class="fa-solid fa-trash"></i></button>
@@ -842,6 +862,7 @@
             filtered.forEach((log, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td class="p-2.5 text-center"><input type="checkbox" class="audit-row-check" value="${String(log.id).replace(/\"/g, '&quot;')}"></td>
                     <td class="p-2.5 font-bold">${idx + 1}</td>
                     <td class="p-2.5 font-semibold text-slate-600">${log.time}</td>
                     <td class="p-2.5"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-bold">${log.type}</span></td>
@@ -849,6 +870,30 @@
                 `;
                 tbody.appendChild(tr);
             });
+        };
+
+        window.toggleAllAuditChecks = function(button) {
+            const checks = Array.from(document.querySelectorAll('.audit-row-check'));
+            const shouldCheck = checks.some(c => !c.checked);
+            checks.forEach(c => c.checked = shouldCheck);
+            if (button) button.textContent = shouldCheck ? 'إلغاء التحديد' : 'تحديد الكل';
+        };
+
+        window.deleteSelectedAuditLogs = function() {
+            const selected = Array.from(document.querySelectorAll('.audit-row-check:checked')).map(c => c.value);
+            if (!selected.length) { alert('حدد حركة واحدة على الأقل للحذف.'); return; }
+            if (!confirm(`سيتم حذف ${selected.length} حركة. هل تريد المتابعة؟`)) return;
+            if (!window.verifyPassword()) return;
+            const ids = new Set(selected.map(String));
+            const before = window.auditLogs.length;
+            window.auditLogs = window.auditLogs.filter(log => !ids.has(String(log.id)));
+            localStorage.setItem('naif_audit', JSON.stringify(window.auditLogs));
+            if (window.syncToFirebase) window.syncToFirebase();
+            
+            // تسجيل حركة تدقيق تفيد بأنه تم مسح حركات من سجل الحركات
+            window.logAction('حذف حركات', `تم حذف ${before - window.auditLogs.length} حركة من سجل الحركات`);
+            renderAuditTable();
+            alert('تم حذف الحركات المحددة بنجاح وتسجيل الحركة بالسجل.');
         };
 
         window.renderSettingsUI = function() {
@@ -878,7 +923,6 @@
         }
 
         window.updateBranchManager = function(idx, val) {
-            if (!window.verifyPassword()) { renderSettingsTable(); return; }
             window.branches[idx].manager = val;
             window.saveDataLocal();
             updateDatalist();
@@ -887,7 +931,6 @@
         };
 
         window.updateBranchOps = function(idx, val) {
-            if (!window.verifyPassword()) { renderSettingsTable(); return; }
             window.branches[idx].ops = val;
             window.saveDataLocal();
             window.logAction('تعديل إعدادات', `تغيير مدير تشغيل الفرع (${window.branches[idx].name}) إلى (${val})`);
@@ -907,7 +950,6 @@
 
         document.getElementById('addSuperForm').onsubmit = function(e) {
             e.preventDefault();
-            if (!window.verifyPassword()) return;
             const sName = document.getElementById('new_super_name').value.trim();
             if (window.supervisors.includes(sName)) {
                 alert('هذا المشرف موجود بالفعل!');
@@ -923,7 +965,6 @@
 
         document.getElementById('addCompTypeForm').onsubmit = function(e) {
             e.preventDefault();
-            if (!window.verifyPassword()) return;
             const tName = document.getElementById('new_type_name').value.trim();
             const tCat = document.getElementById('new_type_category').value;
             if (window.complaintTypes.some(t => t.name === tName)) {
@@ -940,7 +981,6 @@
 
         document.getElementById('addBranchForm').onsubmit = function(e) {
             e.preventDefault();
-            if (!window.verifyPassword()) return;
             const name = document.getElementById('new_branch_name').value.trim();
             const mgr = document.getElementById('new_branch_manager').value;
             const ops = document.getElementById('new_branch_ops').value;
@@ -977,7 +1017,6 @@
         };
 
         window.importBackup = function(event) {
-            if (!window.verifyPassword()) return;
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1045,51 +1084,88 @@
             return counts;
         }
 
-        function renderReport1(container) {
-            container.innerHTML = `
-                <div class="pdf-page-portrait shadow-xl">
-                    ${getHeaderHTML('تقرير الشكاوى اليومية وتراكمي المشرفين والنسب', `تاريخ اليوم: <b>${document.getElementById('filter_date').value}</b>`)}
-                    <table class="pdf-table" style="margin-top:8px;">
-                        <thead>
-                            <tr>
-                                <th style="background-color:#1e3a8a; width:22%;">اسم المشرف</th>
-                                <th style="background-color:#0284c7; width:12%;">اليوم المحدد</th>
-                                <th style="background-color:#0284c7; width:14%;">الإجمالي حتى التاريخ</th>
-                                <th style="background-color:#dc2626; width:12%;">عدد المطاعم</th>
-                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف حسب عدد مطاعمه</th>
-                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف متوسط 7 مطاعم</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${window.supervisors.map(mgr => {
-                                const dayC = window.complaints.filter(c => c.manager === mgr && c.date === document.getElementById('filter_date').value).length;
-                                const monthC = window.complaints.filter(c => c.manager === mgr && c.date >= document.getElementById('filter_date').value.substring(0,8)+'01' && c.date <= document.getElementById('filter_date').value).length;
-                                const branchesCnt = (getManagerBranchCounts())[mgr] || 0;
-                                const rBranch = monthC > 0 ? ((monthC / (branchesCnt || 1)) * 3).toFixed(1) : '0.0';
-                                const rAvg7 = monthC > 0 ? ((monthC / 7) * 3).toFixed(1) : '0.0';
-                                return `
-                                    <tr>
-                                        <td style="font-weight:bold; text-align:right; padding-right:8px;">${mgr}</td>
-                                        <td style="background-color:#e0f2fe; font-weight:bold;">${dayC === 0 ? '-' : dayC}</td>
-                                        <td style="background-color:#e0f2fe; font-weight:bold;">${monthC === 0 ? '-' : monthC}</td>
-                                        <td style="background-color:#fef08a; font-weight:bold;">${branchesCnt}</td>
-                                        <td style="background-color:#fce7f3; font-weight:bold;">%${rBranch}</td>
-                                        <td style="background-color:#fce7f3; font-weight:bold;">%${rAvg7}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+        function getSupervisorSummaryRows(selectedDate) {
+            const monthStart = selectedDate.substring(0, 8) + '01';
+            const branchCounts = getManagerBranchCounts();
+            
+            // حساب إجمالي الشكاوى لجميع المشرفين حتى تاريخه (من بداية الشهر وحتى التاريخ المحدد)
+            let totalMonthComplaints = 0;
+            window.supervisors.forEach(mgr => {
+                const cnt = window.complaints.filter(c => c.manager === mgr && c.date >= monthStart && c.date <= selectedDate).length;
+                totalMonthComplaints += cnt;
+            });
+
+            const totalBranchesAll = window.branches.length;
+            const avgBranches = window.supervisors.length > 0 ? totalBranchesAll / window.supervisors.length : 7;
+
+            const rows = window.supervisors.map(mgr => {
+                const dayC = window.complaints.filter(c => c.manager === mgr && c.date === selectedDate).length;
+                const monthC = window.complaints.filter(c => c.manager === mgr && c.date >= monthStart && c.date <= selectedDate).length;
+                const branchesCnt = branchCounts[mgr] || 0;
+
+                // 1. نسبة كل مشرف حسب عدد مطاعمه = (إجمالي شكاوى المشرف حتى تاريخه / مجموع شكاوى المشرفين حتى تاريخه)
+                const rBranch = totalMonthComplaints > 0 ? (monthC / totalMonthComplaints) * 100 : 0;
+
+                // 2. نسبة كل مشرف متوسط عدد مطاعم = (إجمالي شكاوى المشرف حتى تاريخه / مجموع شكاوى المشرفين حتى تاريخه / عدد مطاعم المشرف) * متوسط عدد المطاعم
+                let rAvg = 0;
+                if (totalMonthComplaints > 0 && branchesCnt > 0) {
+                    rAvg = ((monthC / totalMonthComplaints) / branchesCnt) * avgBranches * 100;
+                }
+
+                return { mgr, dayC, monthC, branchesCnt, rBranch, rAvg };
+            });
+
+            const totals = rows.reduce((a, r) => ({
+                dayC: a.dayC + r.dayC,
+                monthC: a.monthC + r.monthC,
+                branchesCnt: a.branchesCnt + r.branchesCnt
+            }), { dayC: 0, monthC: 0, branchesCnt: 0 });
+
+            totals.rBranch = totalMonthComplaints > 0 ? (totals.monthC / totalMonthComplaints) * 100 : 0;
+            totals.rAvg = avgBranches > 0 ? totals.rBranch : 0;
+
+            return { rows, totals };
         }
 
-        // تم استعادة تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص الملون بالأسفل تماماً
+        function renderReport1(container) {
+            const selectedDate = document.getElementById('filter_date').value;
+            const summary = getSupervisorSummaryRows(selectedDate);
+            const rowHtml = summary.rows.map(r => `
+                <tr>
+                    <td style="font-weight:bold;text-align:right;padding-right:8px;">${r.mgr}</td>
+                    <td style="background-color:#e0f2fe;font-weight:bold;">${r.dayC || '-'}</td>
+                    <td style="background-color:#e0f2fe;font-weight:bold;">${r.monthC || '-'}</td>
+                    <td style="background-color:#fef08a;font-weight:bold;">${r.branchesCnt}</td>
+                    <td style="background-color:#fce7f3;font-weight:bold;">%${r.rBranch.toFixed(1)}</td>
+                    <td style="background-color:#fce7f3;font-weight:bold;">%${r.rAvg.toFixed(1)}</td>
+                </tr>`).join('');
+            const t = summary.totals;
+            container.innerHTML = `
+                <div class="pdf-page-portrait shadow-xl">
+                    ${getHeaderHTML('تقرير الشكاوى اليومية وتراكمي المشرفين والنسب', `تاريخ اليوم: <b>${selectedDate}</b> (من بداية الشهر ${selectedDate.substring(0,8)}01 حتى تاريخه)`)}
+                    <table class="pdf-table" style="margin-top:8px;">
+                        <thead><tr>
+                            <th style="background-color:#1e3a8a;width:22%;">اسم المشرف</th>
+                            <th style="background-color:#0284c7;width:12%;">اليوم المحدد</th>
+                            <th style="background-color:#0284c7;width:14%;">الإجمالي حتى التاريخ</th>
+                            <th style="background-color:#dc2626;width:12%;">عدد المطاعم</th>
+                            <th style="background-color:#0284c7;width:20%;">نسبة كل مشرف حسب عدد مطاعمه</th>
+                            <th style="background-color:#0284c7;width:20%;">نسبة كل مشرف متوسط عدد مطاعم</th>
+                        </tr></thead>
+                        <tbody>${rowHtml}
+                            <tr style="font-weight:900;background:#dbeafe;border-top:2px solid #1e3a8a;">
+                                <td style="text-align:right;padding-right:8px;">الإجمالي</td>
+                                <td>${t.dayC}</td><td>${t.monthC}</td><td>${t.branchesCnt}</td>
+                                <td>%${t.rBranch.toFixed(1)}</td><td>%${t.rAvg.toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`;
+        }
+
         function renderReportDailyFull(container) {
             const selectedDate = document.getElementById('filter_date').value;
             const dayComplaints = window.complaints.filter(c => c.date === selectedDate);
-            const branchCounts = getManagerBranchCounts();
-            const monthStart = selectedDate.substring(0, 8) + '01';
 
             let html = `
                 <div class="pdf-page-portrait shadow-xl" style="width:794px;">
@@ -1139,30 +1215,31 @@
                                 <th style="background-color:#0284c7; width:14%;">الإجمالي حتى التاريخ</th>
                                 <th style="background-color:#dc2626; width:12%;">عدد المطاعم</th>
                                 <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف حسب عدد مطاعمه</th>
-                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف متوسط 7 مطاعم</th>
+                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف متوسط عدد مطاعم</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
 
-            window.supervisors.forEach(mgr => {
-                const dayC = window.complaints.filter(c => c.manager === mgr && c.date === selectedDate).length;
-                const monthC = window.complaints.filter(c => c.manager === mgr && c.date >= monthStart && c.date <= selectedDate).length;
-                const branchesCnt = branchCounts[mgr] || 0;
-                const rBranch = monthC > 0 ? ((monthC / (branchesCnt || 1)) * 3).toFixed(1) : '0.0';
-                const rAvg7 = monthC > 0 ? ((monthC / 7) * 3).toFixed(1) : '0.0';
-
+            const summary = getSupervisorSummaryRows(selectedDate);
+            summary.rows.forEach(r => {
                 html += `
                     <tr>
-                        <td style="font-weight:bold; text-align:right; padding-right:8px;">${mgr}</td>
-                        <td style="background-color:#e0f2fe; font-weight:bold;">${dayC === 0 ? '-' : dayC}</td>
-                        <td style="background-color:#e0f2fe; font-weight:bold;">${monthC === 0 ? '-' : monthC}</td>
-                        <td style="background-color:#fef08a; font-weight:bold;">${branchesCnt}</td>
-                        <td style="background-color:#fce7f3; font-weight:bold;">%${rBranch}</td>
-                        <td style="background-color:#fce7f3; font-weight:bold;">%${rAvg7}</td>
-                    </tr>
-                `;
+                        <td style="font-weight:bold;text-align:right;padding-right:8px;">${r.mgr}</td>
+                        <td style="background-color:#e0f2fe;font-weight:bold;">${r.dayC || '-'}</td>
+                        <td style="background-color:#e0f2fe;font-weight:bold;">${r.monthC || '-'}</td>
+                        <td style="background-color:#fef08a;font-weight:bold;">${r.branchesCnt}</td>
+                        <td style="background-color:#fce7f3;font-weight:bold;">%${r.rBranch.toFixed(1)}</td>
+                        <td style="background-color:#fce7f3;font-weight:bold;">%${r.rAvg.toFixed(1)}</td>
+                    </tr>`;
             });
+            const totals = summary.totals;
+            html += `
+                <tr style="font-weight:900;background:#dbeafe;border-top:2px solid #1e3a8a;">
+                    <td style="text-align:right;padding-right:8px;">الإجمالي</td>
+                    <td>${totals.dayC}</td><td>${totals.monthC}</td><td>${totals.branchesCnt}</td>
+                    <td>%${totals.rBranch.toFixed(1)}</td><td>%${totals.rAvg.toFixed(1)}</td>
+                </tr>`;
 
             html += `
                         </tbody>
@@ -1280,7 +1357,7 @@
             chunks.forEach((chunk, pageIdx) => {
                 fullHtml += `
                     <div class="pdf-page-landscape shadow-xl page-block" style="margin-bottom: 25px;">
-                        ${getHeaderHTML(`تقرير مصفوفة المطاعم وأيام الشهر (الشهر: ${month} / ${year}) - صفحة ${pageIdx + 1} من ${chunks.length}`, `يوضح إجمالي الشكاوى لكل مطعم (33 مطعم كحد أقصى للصفحة) وأرقام أيام الشهر`)}
+                        ${getHeaderHTML(`تقرير مصفوفة المطاعم وأيام الشهر (الشهر: ${month} / ${year}) - صفحة ${pageIdx + 1} من ${chunks.length}`, `يوضح إجمالي الشكاوى لكل مطعم وأيام الشهر`)}
                         <table class="pdf-table matrix-table">
                             <thead>
                                 <tr>
@@ -1311,7 +1388,6 @@
             container.innerHTML = fullHtml;
         };
 
-        // تم استعادة تقرير مدير التشغيل ليعرض جميع مطاعم المجموعة كاملة في صفحة واحدة
         function renderReportOps(container, opsName) {
             const opsBranches = window.branches.filter(b => b.ops === opsName);
             const branchNames = opsBranches.map(b => b.name);
@@ -1402,9 +1478,6 @@
             container.innerHTML = html;
         }
 
-
-        // Build PDF pages by complete table rows. Every continuation page repeats
-        // the report heading and the relevant table heading.
         async function buildPdfPageBlocks(sourceElements) {
             const staging = document.createElement('div');
             staging.style.cssText = 'position:fixed;left:-20000px;top:0;z-index:-1;background:#fff;';
@@ -1481,7 +1554,6 @@
                                 rowIndex++;
                                 addedRows++;
 
-                                // An individual long row is kept intact; its text wraps instead of being clipped.
                                 if (currentHeight > maxHeight && addedRows === 1) break;
                             }
 
