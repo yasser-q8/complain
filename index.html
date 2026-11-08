@@ -24,32 +24,32 @@
             100% { transform: translateY(0px); }
         }
 
-        /* توقيع مطور البرنامج */
+        /* توقيع مطور البرنامج (مُصغر 30%) */
         .signature-card {
             position: fixed;
-            bottom: 15px;
-            left: 15px;
+            bottom: 12px;
+            left: 12px;
             background: #ffffff;
             color: #1e40af;
-            padding: 8px 14px;
-            border-radius: 8px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            font-size: 0.75rem;
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            font-size: 0.65rem;
             font-weight: 600;
             z-index: 1000;
             animation: floatSig 6s ease-in-out infinite;
-            border: 2px solid #ef4444;
+            border: 1.5px solid #ef4444;
             text-decoration: none;
             display: inline-block;
         }
         .signature-card:hover { transform: scale(1.05); }
         @keyframes floatSig { 
             0% { transform: translateY(0px); } 
-            50% { transform: translateY(-10px); } 
+            50% { transform: translateY(-8px); } 
             100% { transform: translateY(0px); } 
         }
-        .signature-card .name { font-size: 0.85rem; font-weight: 700; color: #1d4ed8; }
-        .signature-card .title { font-size: 0.7rem; color: #dc2626; }
+        .signature-card .name { font-size: 0.75rem; font-weight: 700; color: #1d4ed8; }
+        .signature-card .title { font-size: 0.6rem; color: #dc2626; }
 
         @media print { .no-print, .signature-card { display: none !important; } }
 
@@ -65,15 +65,15 @@
         .pdf-page-landscape {
             width: 1123px;
             background: #ffffff;
-            padding: 20px 25px;
+            padding: 15px 20px;
             box-sizing: border-box;
             direction: rtl;
             font-family: 'Cairo', sans-serif;
             margin-bottom: 20px;
         }
 
-        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        .pdf-table th, .pdf-table td { border: 1px solid #94a3b8; padding: 4px 5px; text-align: center; font-size: 10px; }
+        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .pdf-table th, .pdf-table td { border: 1px solid #94a3b8; padding: 3px 4px; text-align: center; font-size: 9.5px; vertical-align: middle; }
         .pdf-table th { background-color: #1e3a8a; color: white; font-weight: bold; }
         
         .checkbox-lg { width: 1.3rem; height: 1.3rem; accent-color: #dc2626; cursor: pointer; }
@@ -103,8 +103,8 @@
 
     <main class="max-w-7xl mx-auto px-4 py-5">
 
-        <!-- STATS CARDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 no-print">
+        <!-- STATS CARDS (Hidden on reports tab) -->
+        <div id="statsCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 no-print">
             <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-red-600 stat-card-float">
                 <div class="flex justify-between items-center">
                     <div>
@@ -177,9 +177,7 @@
 
                 <div class="md:col-span-3 bg-slate-50 p-4 rounded-lg border border-slate-200 mt-2">
                     <label class="block text-xs font-bold text-slate-800 mb-3">تصنيف الشكوى (اختر تصنيفاً واحداً على الأقل) <span class="text-red-500">*</span></label>
-                    <div id="dynamicComplaintTypesContainer" class="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs items-center">
-                        <!-- Dynamically populated complaint types -->
-                    </div>
+                    <div id="dynamicComplaintTypesContainer" class="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs items-center"></div>
                 </div>
 
                 <div class="md:col-span-3 flex justify-end">
@@ -199,7 +197,7 @@
                             <option value="rep_daily_full">2. تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص (ملون)</option>
                             <option value="rep2">3. تقرير إجمالي أنواع الشكاوى (تمييز الأعلى والأقل)</option>
                             <option value="rep3">4. التقرير اليومي الشامل لمشرفي الشهر (Landscape - صفحة واحدة)</option>
-                            <option value="rep_matrix_branches">5. تقرير مصفوفة المطاعم وأيام الشهر (أرقام الأيام - Landscape)</option>
+                            <option value="rep_matrix_branches">5. تقرير مصفوفة المطاعم وأيام الشهر (33 مطعم لكل صفحة - أرقام الأيام)</option>
                             <option value="rep_ops_tb">6. تقرير مدير التشغيل: طارق بيومي</option>
                             <option value="rep_ops_hy">7. تقرير مدير التشغيل: هاني عبدالله</option>
                             <option value="rep4">8. تقرير الأفرع الأكثر تضرراً من الشكاوى</option>
@@ -219,7 +217,7 @@
                     </div>
                 </div>
 
-                <button onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير التقرير PDF (صفحة واحدة/متعدد)</button>
+                <button onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير التقرير PDF</button>
             </div>
 
             <!-- Report Rendering Box -->
@@ -230,13 +228,24 @@
 
         <!-- TAB 3: LIST & DETAILS -->
         <section id="tab-list" class="hidden bg-white rounded-xl shadow-md p-6">
-            <h2 class="text-base font-bold text-slate-800 border-b pb-3 mb-4 flex flex-wrap justify-between items-center gap-2">
-                <span><i class="fa-solid fa-receipt text-red-600 ml-2"></i> سجل الشكاوى المسجلة بالنظام</span>
-                <div class="flex items-center gap-2">
+            <div class="flex flex-wrap justify-between items-center border-b pb-3 mb-4 gap-3">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-receipt text-red-600 ml-2"></i> سجل الشكاوى المسجلة بالنظام
+                    </h2>
                     <span id="list_count" class="bg-red-100 text-red-800 text-xs font-extrabold px-3 py-1 rounded-full">0 شكوى</span>
-                    <button onclick="exportComplaintsPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-4 py-2 rounded-lg text-xs shadow flex items-center"><i class="fa-solid fa-file-pdf ml-1"></i> تصدير السجل PDF</button>
                 </div>
-            </h2>
+                <!-- Filter Range for Complaints List -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-slate-600">فلتر الفترة:</span>
+                    <input type="date" id="list_from" onchange="renderComplaintsList()" class="border border-slate-300 rounded p-1 text-xs">
+                    <span class="text-xs">إلى</span>
+                    <input type="date" id="list_to" onchange="renderComplaintsList()" class="border border-slate-300 rounded p-1 text-xs">
+                    <button onclick="resetListFilter()" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded text-xs font-bold">الكل</button>
+                    <button onclick="exportComplaintsPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-3 py-1.5 rounded text-xs shadow flex items-center"><i class="fa-solid fa-file-pdf ml-1"></i> تصدير PDF</button>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-xs text-right border-collapse">
                     <thead>
@@ -260,7 +269,7 @@
         <section id="tab-audit" class="hidden bg-white rounded-xl shadow-md p-6">
             <div class="flex flex-wrap justify-between items-center border-b pb-3 mb-4 gap-2">
                 <h2 class="text-base font-bold text-slate-800 flex items-center">
-                    <i class="fa-solid fa-shield-halved text-red-600 ml-2"></i> سجل الحركات الشامل لجميع الأجهزة (محمي - لا يقبل الحذف)
+                    <i class="fa-solid fa-shield-halved text-red-600 ml-2"></i> سجل الحركات الشامل لجميع الأجهزة (محمي بكلمة المرور - لا يقبل الحذف)
                 </h2>
                 <div class="w-full md:w-72">
                     <input type="text" id="auditSearch" onkeyup="renderAuditTable()" placeholder="بحث شامل في الحركات بالحرف..." class="w-full border border-slate-300 rounded-lg p-2 text-xs">
@@ -284,10 +293,9 @@
         <!-- TAB 5: SETTINGS -->
         <section id="tab-settings" class="hidden bg-white rounded-xl shadow-md p-6 space-y-6">
             <h2 class="text-base font-bold text-slate-800 border-b pb-3 flex items-center">
-                <i class="fa-solid fa-sliders text-red-600 ml-2"></i> الإعدادات المتقدمة وإدارة المشرفين وأنواع الشكاوى (بكلمة المرور 123321)
+                <i class="fa-solid fa-sliders text-red-600 ml-2"></i> الإعدادات المتقدمة وإدارة المشرفين وأنواع الشكاوى (محمي بكلمة المرور 123321)
             </h2>
 
-            <!-- Backup / Restore -->
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-800">النسخ الاحتياطي واستعادة البيانات</h3>
@@ -301,7 +309,6 @@
                 </div>
             </div>
 
-            <!-- Add New Supervisor Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h3 class="text-xs font-extrabold text-slate-700 mb-3">إضافة مشرف منطقة جديد</h3>
@@ -314,7 +321,6 @@
                     </form>
                 </div>
 
-                <!-- Add New Complaint Type Section -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h3 class="text-xs font-extrabold text-slate-700 mb-3">إضافة نوع شكوى جديد وتصنيفه</h3>
                     <form id="addCompTypeForm" class="space-y-3">
@@ -335,7 +341,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Add New Branch -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h3 class="text-xs font-extrabold text-slate-700 mb-3">إضافة مطعم / فرع جديد</h3>
                     <form id="addBranchForm" class="space-y-3">
@@ -344,10 +349,8 @@
                             <input type="text" id="new_branch_name" required class="w-full border border-slate-300 rounded p-2 text-xs">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">مشرف المنطقة (اختر من القائمة)</label>
-                            <select id="new_branch_manager" required class="w-full border border-slate-300 rounded p-2 text-xs font-bold">
-                                <!-- Populated dynamically -->
-                            </select>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">مشرف المنطقة</label>
+                            <select id="new_branch_manager" required class="w-full border border-slate-300 rounded p-2 text-xs font-bold"></select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">مدير التشغيل</label>
@@ -360,7 +363,6 @@
                     </form>
                 </div>
 
-                <!-- Manage Existing Branches -->
                 <div class="md:col-span-2">
                     <h3 class="text-xs font-extrabold text-slate-700 mb-3">قائمة الأفرع وتغيير المشرفين (محمي بكلمة المرور)</h3>
                     <div class="max-h-96 overflow-y-auto border border-slate-200 rounded-lg">
@@ -396,7 +398,7 @@
         </div>
     </div>
 
-    <!-- Floating Developer Signature Card -->
+    <!-- Floating Developer Signature Card (Reduced 30%) -->
     <a href="https://yasser-q8.github.io/myprofile/#" class="signature-card" target="_blank" rel="noopener noreferrer">
         <div class="name">Yasser Elkhateeb</div>
         <div class="title">مطور البرنامج 67011143</div>
@@ -420,7 +422,6 @@
         const db = getFirestore(fbApp);
         window.db = db;
 
-        // Global Sync Function
         window.syncToFirebase = async function() {
             try {
                 await setDoc(doc(db, "naif_data", "main_store"), {
@@ -436,7 +437,6 @@
             }
         };
 
-        // Fetch from Firebase on load
         async function loadFromFirebase() {
             try {
                 const snap = await getDoc(doc(db, "naif_data", "main_store"));
@@ -459,7 +459,6 @@
     </script>
 
     <script>
-        // Default Data Structures
         const defaultBranches = [
             { name: 'مول 360', manager: 'وليد صبري', ops: 'طارق بيومي' },
             { name: 'جمعية أبو فطيرة', manager: 'عماد عبدالحميد', ops: 'هاني عبدالله' },
@@ -673,6 +672,14 @@
             document.getElementById(`btn-${tabName}`).classList.remove('bg-red-900', 'text-white');
             document.getElementById(`btn-${tabName}`).classList.add('bg-yellow-500', 'text-slate-900');
 
+            // إخفاء الكروت الطائرة عند فتح صفحة التقارير بناءً على الطلب
+            const statsContainer = document.getElementById('statsCardsContainer');
+            if (tabName === 'reports') {
+                statsContainer.classList.add('hidden');
+            } else {
+                statsContainer.classList.remove('hidden');
+            }
+
             if (tabName === 'reports') renderActiveReport();
             if (tabName === 'audit') renderAuditTable();
             if (tabName === 'settings') renderSettingsUI();
@@ -734,13 +741,22 @@
             document.getElementById('stat_service').textContent = s;
         }
 
+        // فلتر سجل الشكاوى حسب الفترة المحددة
         window.renderComplaintsList = function() {
             const tbody = document.getElementById('complaintsTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
-            document.getElementById('list_count').textContent = `${window.complaints.length} شكوى`;
 
-            window.complaints.forEach((c, idx) => {
+            const fromDate = document.getElementById('list_from').value;
+            const toDate = document.getElementById('list_to').value;
+
+            let filtered = window.complaints;
+            if (fromDate) filtered = filtered.filter(c => c.date >= fromDate);
+            if (toDate) filtered = filtered.filter(c => c.date <= toDate);
+
+            document.getElementById('list_count').textContent = `${filtered.length} شكوى`;
+
+            filtered.forEach((c, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-100 transition';
                 tr.innerHTML = `
@@ -760,6 +776,12 @@
             });
         };
 
+        window.resetListFilter = function() {
+            document.getElementById('list_from').value = '';
+            document.getElementById('list_to').value = '';
+            renderComplaintsList();
+        };
+
         window.viewDetails = function(id) {
             const c = window.complaints.find(x => x.id === id);
             if (!c) return;
@@ -777,12 +799,13 @@
 
         window.closeModal = function() { document.getElementById('detailsModal').classList.add('hidden'); };
 
+        // مسح الشكوى بدون كلمة مرور بناءً على طلبك
         window.deleteComplaint = function(id) {
-            if (!window.verifyPassword()) return;
+            if (!confirm('هل أنت متأكد من حذف هذه الشكوى؟')) return;
             const comp = window.complaints.find(x => x.id === id);
             window.complaints = window.complaints.filter(c => c.id !== id);
             window.saveDataLocal();
-            window.logAction('حذف شكوى', `تم حذف شكوى الفرع (${comp ? comp.branch : id}) بعد التحقق بكلمة المرور`);
+            window.logAction('حذف شكوى', `تم حذف شكوى الفرع (${comp ? comp.branch : id}) من سجل الشكاوى`);
             updateStats();
             renderComplaintsList();
             renderActiveReport();
@@ -809,7 +832,6 @@
             });
         };
 
-        // Settings UI & Actions
         window.renderSettingsUI = function() {
             renderSettingsTable();
             renderSupervisorsDropdown();
@@ -953,7 +975,7 @@
                         window.initAppUI();
                         renderComplaintsList();
                         updateStats();
-                        window.logAction('استعادة بيانات', 'استعادة البيانات بنجاح من ملف النسخة الاحتياطية.');
+                        window.logAction('استعادة بيانات', 'استعادة البيانات بنجاح من النسخة الاحتياطية.');
                         alert('تم استعادة البيانات بنجاح!');
                     } else {
                         alert('ملف غير صالح!');
@@ -974,7 +996,7 @@
             else if (repType === 'rep_daily_full') renderReportDailyFull(container);
             else if (repType === 'rep2') renderReport2(container);
             else if (repType === 'rep3') renderReport3(container);
-            else if (repType === 'rep_matrix_branches') renderReportMatrixBranches(container);
+            else if (repType === 'rep_matrix_branches') renderReportMatrixBranchesPages(container);
             else if (repType === 'rep_ops_tb') renderReportOps(container, 'طارق بيومي');
             else if (repType === 'rep_ops_hy') renderReportOps(container, 'هاني عبدالله');
             else if (repType === 'rep4') renderReport4(container);
@@ -1004,7 +1026,6 @@
             return counts;
         }
 
-        // 1. Report 1 (Photo Matched)
         function renderReport1(container) {
             container.className = 'pdf-page-portrait shadow-xl';
             const selectedDate = document.getElementById('filter_date').value;
@@ -1067,7 +1088,6 @@
             container.innerHTML = html;
         }
 
-        // 2. Report Daily Full + Summary
         function renderReportDailyFull(container) {
             container.className = 'pdf-page-portrait shadow-xl';
             const selectedDate = document.getElementById('filter_date').value;
@@ -1110,7 +1130,6 @@
 
             html += `</tbody></table>`;
 
-            // Summary Part below
             html += `<h4 style="font-size:10px; font-weight:bold; color:#1e3a8a; margin:8px 0 2px 0;">ثانياً: ملخص الشكاوى اليومية وتراكمي المشرفين والنسب:</h4>`;
             const branchCounts = getManagerBranchCounts();
             const monthStart = selectedDate.substring(0, 8) + '01';
@@ -1148,14 +1167,10 @@
                 `;
             });
 
-            html += `
-                    </tbody>
-                </table>
-            `;
+            html += `</tbody></table>`;
             container.innerHTML = html;
         }
 
-        // 3. Report 2: Types Summary
         function renderReport2(container) {
             container.className = 'pdf-page-portrait shadow-xl';
             const fromDate = document.getElementById('filter_from').value;
@@ -1219,7 +1234,6 @@
             container.innerHTML = html;
         }
 
-        // 4. Report 3: Monthly Matrix (Landscape)
         function renderReport3(container) {
             container.className = 'pdf-page-landscape shadow-xl';
             const selectedDate = document.getElementById('filter_date').value;
@@ -1256,46 +1270,57 @@
             container.innerHTML = html;
         }
 
-        // 5. NEW REPORT: Restaurant & Days Matrix (Day number only like 1, 2, 3...)
-        function renderReportMatrixBranches(container) {
+        // NEW REPORT: Restaurant & Days Matrix (33 restaurants per page max, vertical/horizontal centered, day numbers only)
+        window.renderReportMatrixBranchesPages = function(container) {
             container.className = 'pdf-page-landscape shadow-xl';
             const selectedDate = document.getElementById('filter_date').value;
             const year = selectedDate.substring(0, 4);
             const month = selectedDate.substring(5, 7);
             const daysCount = new Date(year, month, 0).getDate();
 
-            let html = getHeaderHTML(`تقرير مصفوفة المطاعم وأيام الشهر (الشهر: ${month} / ${year})`, `يوضح إجمالي الشكاوى لكل مطعم في كل يوم من الأيام (أرقام الأيام فقط لتوفير المساحة)`);
-
-            html += `
-                <table class="pdf-table" style="font-size:7px; line-height: 1.1;">
-                    <thead>
-                        <tr>
-                            <th style="width:14%; padding:2px;">اسم المطعم</th>
-            `;
-            for (let d = 1; d <= daysCount; d++) {
-                html += `<th style="padding:1px; width:2.2%;">${d}</th>`;
+            // Split branches into chunks of 33 max per page
+            const chunkSize = 33;
+            let chunks = [];
+            for (let i = 0; i < window.branches.length; i += chunkSize) {
+                chunks.push(window.branches.slice(i, i + chunkSize));
             }
-            html += `<th style="background:#0284c7; width:5%; padding:2px;">الإجمالي</th></tr></thead><tbody>`;
 
-            window.branches.forEach(b => {
-                let rowSum = 0;
-                html += `<tr><td style="font-weight:bold; background:#f1f5f9; text-align:right; padding-right:4px;">${b.name}</td>`;
+            let fullHtml = '';
+            chunks.forEach((chunk, pageIdx) => {
+                fullHtml += `<div class="${pageIdx > 0 ? 'pdf-page-landscape' : ''}" style="page-break-after: always;">`;
+                fullHtml += getHeaderHTML(`تقرير مصفوفة المطاعم وأيام الشهر (الشهر: ${month} / ${year}) - صفحة ${pageIdx + 1} من ${chunks.length}`, `يوضح إجمالي الشكاوى لكل مطعم (33 مطعم كحد أقصى للصفحة) وأرقام أيام الشهر`);
 
+                fullHtml += `
+                    <table class="pdf-table" style="font-size:7px; line-height: 1.1;">
+                        <thead>
+                            <tr>
+                                <th style="width:13%; padding:2px;">اسم المطعم</th>
+                `;
                 for (let d = 1; d <= daysCount; d++) {
-                    const dayStr = `${year}-${month}-${d < 10 ? '0' + d : d}`;
-                    const cnt = window.complaints.filter(c => c.branch === b.name && c.date === dayStr).length;
-                    rowSum += cnt;
-                    html += `<td style="${cnt > 0 ? 'background-color:#fee2e2; font-weight:bold;' : ''} padding:1px;">${cnt === 0 ? '-' : cnt}</td>`;
+                    fullHtml += `<th style="padding:1px; width:2.2%;">${d}</th>`;
                 }
+                fullHtml += `<th style="background:#0284c7; width:5%; padding:2px;">الإجمالي</th></tr></thead><tbody>`;
 
-                html += `<td style="font-weight:bold; background:#e0f2fe; padding:2px;">${rowSum === 0 ? '-' : rowSum}</td></tr>`;
+                chunk.forEach(b => {
+                    let rowSum = 0;
+                    fullHtml += `<tr><td style="font-weight:bold; background:#f1f5f9; text-align:right; padding-right:4px; vertical-align:middle;">${b.name}</td>`;
+
+                    for (let d = 1; d <= daysCount; d++) {
+                        const dayStr = `${year}-${month}-${d < 10 ? '0' + d : d}`;
+                        const cnt = window.complaints.filter(c => c.branch === b.name && c.date === dayStr).length;
+                        rowSum += cnt;
+                        fullHtml += `<td style="${cnt > 0 ? 'background-color:#fee2e2; font-weight:bold;' : ''} padding:1px; vertical-align:middle; text-align:center;">${cnt === 0 ? '-' : cnt}</td>`;
+                    }
+
+                    fullHtml += `<td style="font-weight:bold; background:#e0f2fe; padding:2px; vertical-align:middle; text-align:center;">${rowSum === 0 ? '-' : rowSum}</td></tr>`;
+                });
+
+                fullHtml += `</tbody></table></div>`;
             });
 
-            html += `</tbody></table>`;
-            container.innerHTML = html;
-        }
+            container.innerHTML = fullHtml;
+        };
 
-        // 6. Operations Manager Report
         function renderReportOps(container, opsName) {
             container.className = 'pdf-page-portrait shadow-xl';
             const opsBranches = window.branches.filter(b => b.ops === opsName);
@@ -1326,21 +1351,21 @@
 
                 html += `
                     <tr>
-                        <td style="font-weight:bold; text-align:right; padding:3px 8px;">${b.name}</td>
-                        <td style="padding:3px;">${b.manager}</td>
-                        <td style="font-weight:bold; font-size:11px; padding:3px;">${cnt === 0 ? '-' : cnt}</td>
-                        <td style="padding:3px;">%${ratio}</td>
-                        <td style="padding:3px;">${status}</td>
+                        <td style="font-weight:bold; text-align:right; padding:3px 8px; vertical-align:middle;">${b.name}</td>
+                        <td style="padding:3px; vertical-align:middle;">${b.manager}</td>
+                        <td style="font-weight:bold; font-size:11px; padding:3px; vertical-align:middle;">${cnt === 0 ? '-' : cnt}</td>
+                        <td style="padding:3px; vertical-align:middle;">%${ratio}</td>
+                        <td style="padding:3px; vertical-align:middle;">${status}</td>
                     </tr>
                 `;
             });
 
             html += `
                     <tr style="background:#f1f5f9; font-weight:bold;">
-                        <td colspan="2" style="text-align:right; padding:4px 8px;">إجمالي مجموعة ${opsName}</td>
-                        <td style="padding:4px;">${opsComplaints.length === 0 ? '-' : opsComplaints.length}</td>
-                        <td style="padding:4px;">100%</td>
-                        <td style="padding:4px;">-</td>
+                        <td colspan="2" style="text-align:right; padding:4px 8px; vertical-align:middle;">إجمالي مجموعة ${opsName}</td>
+                        <td style="padding:4px; vertical-align:middle;">${opsComplaints.length === 0 ? '-' : opsComplaints.length}</td>
+                        <td style="padding:4px; vertical-align:middle;">100%</td>
+                        <td style="padding:4px; vertical-align:middle;">-</td>
                     </tr>
                     </tbody>
                 </table>
@@ -1348,7 +1373,6 @@
             container.innerHTML = html;
         }
 
-        // 7. Report 4: Affected Branches
         function renderReport4(container) {
             container.className = 'pdf-page-portrait shadow-xl';
             const counts = {};
@@ -1392,7 +1416,6 @@
             container.innerHTML = html;
         }
 
-        // Export PDF Function (Multi-page with header repeat and page numbering)
         window.exportReportPDF = async function() {
             const container = document.getElementById('reportContainer');
             try {
@@ -1400,7 +1423,7 @@
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
                 const { jsPDF } = window.jspdf;
                 
-                const isLandscape = container.classList.contains('pdf-page-landscape');
+                const isLandscape = container.classList.contains('pdf-page-landscape') || document.getElementById('reportSelect').value === 'rep_matrix_branches';
                 const pdf = new jsPDF({
                     orientation: isLandscape ? 'landscape' : 'portrait',
                     unit: 'pt',
@@ -1440,14 +1463,18 @@
             }
         };
 
-        // Export Complaints List as PDF
         window.exportComplaintsPDF = async function() {
-            const listSection = document.getElementById('tab-list');
-            // Temporarily clone or print list
             const container = document.createElement('div');
             container.className = 'pdf-page-portrait shadow-xl';
+            
+            const fromDate = document.getElementById('list_from').value;
+            const toDate = document.getElementById('list_to').value;
+            let filtered = window.complaints;
+            if (fromDate) filtered = filtered.filter(c => c.date >= fromDate);
+            if (toDate) filtered = filtered.filter(c => c.date <= toDate);
+
             container.innerHTML = `
-                ${getHeaderHTML('سجل الشكاوى المسجلة بالكامل', 'قائمة بجميع الشكاوى والملاحظات المسجلة بالنظام')}
+                ${getHeaderHTML('سجل الشكاوى المسجلة بالنظام', `قائمة الشكاوى والملاحظات ${fromDate ? 'من ('+fromDate+')' : ''} ${toDate ? 'إلى ('+toDate+')' : ''}`)}
                 <table class="pdf-table" style="margin-top:10px;">
                     <thead>
                         <tr>
@@ -1463,7 +1490,7 @@
                     <tbody>
             `;
 
-            window.complaints.forEach((c, idx) => {
+            filtered.forEach((c, idx) => {
                 container.innerHTML += `
                     <tr>
                         <td>${idx + 1}</td>
@@ -1507,8 +1534,8 @@
                     heightLeft -= pdfHeight;
                 }
 
-                pdf.save(`شركة_نايف_سجل_الشكاوى_بالكامل.pdf`);
-                window.logAction('تصدير PDF', 'تصدير سجل الشكاوى المسجلة بالكامل');
+                pdf.save(`شركة_نايف_سجل_الشكاوى.pdf`);
+                window.logAction('تصدير PDF', 'تصدير سجل الشكاوى المسجلة');
             } catch(err) {
                 console.error(err);
                 alert('حدث خطأ أثناء التصدير');
