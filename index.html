@@ -65,7 +65,7 @@
         .pdf-page-landscape {
             width: 1123px;
             background: #ffffff;
-            padding: 15px 20px;
+            padding: 18px 22px;
             box-sizing: border-box;
             direction: rtl;
             font-family: 'Cairo', sans-serif;
@@ -73,9 +73,33 @@
         }
 
         .pdf-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .pdf-table th, .pdf-table td { border: 1px solid #94a3b8; padding: 3px 4px; text-align: center; font-size: 9.5px; vertical-align: middle; }
+        .pdf-table th, .pdf-table td { 
+            border: 1px solid #94a3b8; 
+            padding: 4px 3px; 
+            text-align: center; 
+            font-size: 9px; 
+            vertical-align: middle; 
+            line-height: 1.45;
+        }
         .pdf-table th { background-color: #1e3a8a; color: white; font-weight: bold; }
         
+        .matrix-table th, .matrix-table td {
+            padding: 3.5px 2px !important;
+            font-size: 8px !important;
+            line-height: 1.4 !important;
+        }
+
+
+        /* PDF export: preserve column widths and wrap long Arabic text naturally. */
+        .pdf-table { table-layout: auto; }
+        .pdf-table th, .pdf-table td {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+        .pdf-table tr { break-inside: avoid; page-break-inside: avoid; }
+        .pdf-page-portrait, .pdf-page-landscape { overflow: visible; }
+
         .checkbox-lg { width: 1.3rem; height: 1.3rem; accent-color: #dc2626; cursor: pointer; }
     </style>
 </head>
@@ -103,7 +127,7 @@
 
     <main class="max-w-7xl mx-auto px-4 py-5">
 
-        <!-- STATS CARDS (Hidden on reports tab) -->
+        <!-- STATS CARDS -->
         <div id="statsCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 no-print">
             <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-red-600 stat-card-float">
                 <div class="flex justify-between items-center">
@@ -217,11 +241,11 @@
                     </div>
                 </div>
 
-                <button onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير التقرير PDF</button>
+                <button onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير التقرير PDF (دقيق)</button>
             </div>
 
             <!-- Report Rendering Box -->
-            <div class="bg-slate-300 p-4 rounded-xl overflow-x-auto flex justify-center">
+            <div class="bg-slate-300 p-4 rounded-xl overflow-x-auto flex flex-col items-center gap-6">
                 <div id="reportContainer"></div>
             </div>
         </section>
@@ -235,7 +259,6 @@
                     </h2>
                     <span id="list_count" class="bg-red-100 text-red-800 text-xs font-extrabold px-3 py-1 rounded-full">0 شكوى</span>
                 </div>
-                <!-- Filter Range for Complaints List -->
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="text-xs font-bold text-slate-600">فلتر الفترة:</span>
                     <input type="date" id="list_from" onchange="renderComplaintsList()" class="border border-slate-300 rounded p-1 text-xs">
@@ -398,7 +421,7 @@
         </div>
     </div>
 
-    <!-- Floating Developer Signature Card (Reduced 30%) -->
+    <!-- Floating Developer Signature Card -->
     <a href="https://yasser-q8.github.io/myprofile/#" class="signature-card" target="_blank" rel="noopener noreferrer">
         <div class="name">Yasser Elkhateeb</div>
         <div class="title">مطور البرنامج 67011143</div>
@@ -672,7 +695,6 @@
             document.getElementById(`btn-${tabName}`).classList.remove('bg-red-900', 'text-white');
             document.getElementById(`btn-${tabName}`).classList.add('bg-yellow-500', 'text-slate-900');
 
-            // إخفاء الكروت الطائرة عند فتح صفحة التقارير بناءً على الطلب
             const statsContainer = document.getElementById('statsCardsContainer');
             if (tabName === 'reports') {
                 statsContainer.classList.add('hidden');
@@ -685,7 +707,6 @@
             if (tabName === 'settings') renderSettingsUI();
         };
 
-        // Form Submit
         document.getElementById('complaintForm').onsubmit = function(e) {
             e.preventDefault();
             const branchName = document.getElementById('c_branch').value.trim();
@@ -741,7 +762,6 @@
             document.getElementById('stat_service').textContent = s;
         }
 
-        // فلتر سجل الشكاوى حسب الفترة المحددة
         window.renderComplaintsList = function() {
             const tbody = document.getElementById('complaintsTableBody');
             if(!tbody) return;
@@ -799,7 +819,6 @@
 
         window.closeModal = function() { document.getElementById('detailsModal').classList.add('hidden'); };
 
-        // مسح الشكوى بدون كلمة مرور بناءً على طلبك
         window.deleteComplaint = function(id) {
             if (!confirm('هل أنت متأكد من حذف هذه الشكوى؟')) return;
             const comp = window.complaints.find(x => x.id === id);
@@ -1004,14 +1023,14 @@
 
         function getHeaderHTML(title, sub) {
             return `
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #b91c1c; padding-bottom:6px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #b91c1c; padding-bottom:5px; margin-bottom:6px;">
                     <div style="text-align:right;">
-                        <h2 style="font-size:15px; font-weight:800; color:#b91c1c; margin:0;">شركة نايف للأغذية</h2>
-                        <h3 style="font-size:12px; font-weight:bold; color:#1e3a8a; margin:1px 0;">${title}</h3>
-                        <div style="font-size:9.5px; color:#475569;">${sub}</div>
+                        <h2 style="font-size:14px; font-weight:800; color:#b91c1c; margin:0; line-height:1.2;">شركة نايف للأغذية</h2>
+                        <h3 style="font-size:11px; font-weight:bold; color:#1e3a8a; margin:2px 0; line-height:1.2;">${title}</h3>
+                        <div style="font-size:9px; color:#475569; line-height:1.2;">${sub}</div>
                     </div>
                     <div>
-                        <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" style="height:42px; border-radius:50%;">
+                        <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" style="height:38px; border-radius:50%;">
                     </div>
                 </div>
             `;
@@ -1027,132 +1046,110 @@
         }
 
         function renderReport1(container) {
-            container.className = 'pdf-page-portrait shadow-xl';
-            const selectedDate = document.getElementById('filter_date').value;
-            const monthStart = selectedDate.substring(0, 8) + '01';
-            const branchCounts = getManagerBranchCounts();
-
-            let totalDay = 0, totalMonth = 0;
-            const stats = window.supervisors.map(mgr => {
-                const dayC = window.complaints.filter(c => c.manager === mgr && c.date === selectedDate).length;
-                const monthC = window.complaints.filter(c => c.manager === mgr && c.date >= monthStart && c.date <= selectedDate).length;
-                totalDay += dayC;
-                totalMonth += monthC;
-                return { name: mgr, branches: branchCounts[mgr] || 0, dayC, monthC };
-            });
-
-            let html = getHeaderHTML('تقرير الشكاوى اليومية وتراكمي المشرفين والنسب', `تاريخ اليوم: <b>${selectedDate}</b> | الفترة من: <b>${monthStart}</b> إلى <b>${selectedDate}</b>`);
-
-            html += `
-                <table class="pdf-table" style="margin-top:10px;">
-                    <thead>
-                        <tr>
-                            <th style="background-color:#1e3a8a; width:22%;">اسم المشرف</th>
-                            <th style="background-color:#0284c7; width:12%;">اليوم المحدد</th>
-                            <th style="background-color:#0284c7; width:14%;">الإجمالي حتى التاريخ</th>
-                            <th style="background-color:#dc2626; width:12%;">عدد المطاعم</th>
-                            <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف حسب عدد مطاعمه</th>
-                            <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف متوسط 7 مطاعم</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            container.innerHTML = `
+                <div class="pdf-page-portrait shadow-xl">
+                    ${getHeaderHTML('تقرير الشكاوى اليومية وتراكمي المشرفين والنسب', `تاريخ اليوم: <b>${document.getElementById('filter_date').value}</b>`)}
+                    <table class="pdf-table" style="margin-top:8px;">
+                        <thead>
+                            <tr>
+                                <th style="background-color:#1e3a8a; width:22%;">اسم المشرف</th>
+                                <th style="background-color:#0284c7; width:12%;">اليوم المحدد</th>
+                                <th style="background-color:#0284c7; width:14%;">الإجمالي حتى التاريخ</th>
+                                <th style="background-color:#dc2626; width:12%;">عدد المطاعم</th>
+                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف حسب عدد مطاعمه</th>
+                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف متوسط 7 مطاعم</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${window.supervisors.map(mgr => {
+                                const dayC = window.complaints.filter(c => c.manager === mgr && c.date === document.getElementById('filter_date').value).length;
+                                const monthC = window.complaints.filter(c => c.manager === mgr && c.date >= document.getElementById('filter_date').value.substring(0,8)+'01' && c.date <= document.getElementById('filter_date').value).length;
+                                const branchesCnt = (getManagerBranchCounts())[mgr] || 0;
+                                const rBranch = monthC > 0 ? ((monthC / (branchesCnt || 1)) * 3).toFixed(1) : '0.0';
+                                const rAvg7 = monthC > 0 ? ((monthC / 7) * 3).toFixed(1) : '0.0';
+                                return `
+                                    <tr>
+                                        <td style="font-weight:bold; text-align:right; padding-right:8px;">${mgr}</td>
+                                        <td style="background-color:#e0f2fe; font-weight:bold;">${dayC === 0 ? '-' : dayC}</td>
+                                        <td style="background-color:#e0f2fe; font-weight:bold;">${monthC === 0 ? '-' : monthC}</td>
+                                        <td style="background-color:#fef08a; font-weight:bold;">${branchesCnt}</td>
+                                        <td style="background-color:#fce7f3; font-weight:bold;">%${rBranch}</td>
+                                        <td style="background-color:#fce7f3; font-weight:bold;">%${rAvg7}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
             `;
-
-            stats.forEach(st => {
-                const rBranch = st.monthC > 0 ? ((st.monthC / (st.branches || 1)) * 3).toFixed(1) : '0.0';
-                const rAvg7 = st.monthC > 0 ? ((st.monthC / 7) * 3).toFixed(1) : '0.0';
-
-                html += `
-                    <tr>
-                        <td style="font-weight:bold; text-align:right; padding-right:8px;">${st.name}</td>
-                        <td style="background-color:#e0f2fe; font-weight:bold;">${st.dayC === 0 ? '-' : st.dayC}</td>
-                        <td style="background-color:#e0f2fe; font-weight:bold;">${st.monthC === 0 ? '-' : st.monthC}</td>
-                        <td style="background-color:#fef08a; font-weight:bold; font-size:11px;">${st.branches}</td>
-                        <td style="background-color:#fce7f3; font-weight:bold;">%${rBranch}</td>
-                        <td style="background-color:#fce7f3; font-weight:bold;">%${rAvg7}</td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                    <tr style="background-color:#f1f5f9; font-weight:bold;">
-                        <td style="text-align:right; padding-right:8px;">الإجمالي العام</td>
-                        <td style="background-color:#bae6fd;">${totalDay === 0 ? '-' : totalDay}</td>
-                        <td style="background-color:#bae6fd;">${totalMonth === 0 ? '-' : totalMonth}</td>
-                        <td style="background-color:#fef08a;">${Object.values(branchCounts).reduce((a,b)=>a+b,0)}</td>
-                        <td colspan="2" style="text-align:center; color:#475569;">مؤشرات إحصائية معتمدة</td>
-                    </tr>
-                    </tbody>
-                </table>
-            `;
-            container.innerHTML = html;
         }
 
+        // تم استعادة تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص الملون بالأسفل تماماً
         function renderReportDailyFull(container) {
-            container.className = 'pdf-page-portrait shadow-xl';
             const selectedDate = document.getElementById('filter_date').value;
             const dayComplaints = window.complaints.filter(c => c.date === selectedDate);
+            const branchCounts = getManagerBranchCounts();
+            const monthStart = selectedDate.substring(0, 8) + '01';
 
-            let html = getHeaderHTML('تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص', `تاريخ اليوم: <b>${selectedDate}</b>`);
-
-            html += `<h4 style="font-size:10px; font-weight:bold; color:#b91c1c; margin:4px 0 2px 0;">أولاً: سجل الشكاوى تفصيلي لهذا اليوم:</h4>`;
-            html += `
-                <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th style="width:5%;">م</th>
-                            <th style="width:13%;">الفرع</th>
-                            <th style="width:15%;">المشرف</th>
-                            <th style="width:11%;">الهاتف</th>
-                            <th style="width:41%;">تفاصيل الشكوى</th>
-                            <th style="width:15%;">التصنيف</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            let html = `
+                <div class="pdf-page-portrait shadow-xl" style="width:794px;">
+                    ${getHeaderHTML('تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص', `تاريخ اليوم: <b>${selectedDate}</b>`)}
+                    <h4 style="font-size:10px; font-weight:bold; color:#b91c1c; margin:4px 0 2px 0;">أولاً: سجل الشكاوى تفصيلي لهذا اليوم:</h4>
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th style="width:5%;">م</th>
+                                <th style="width:13%;">الفرع</th>
+                                <th style="width:15%;">المشرف</th>
+                                <th style="width:11%;">الهاتف</th>
+                                <th style="width:41%;">تفاصيل الشكوى</th>
+                                <th style="width:15%;">التصنيف</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
             if (dayComplaints.length === 0) {
-                html += `<tr><td colspan="6" style="padding:10px; color:#94a3b8;">لا توجد شكاوى مسجلة في هذا اليوم</td></tr>`;
+                html += `<tr><td colspan="6" style="padding:8px; color:#94a3b8;">لا توجد شكاوى مسجلة في هذا اليوم</td></tr>`;
             } else {
                 dayComplaints.forEach((c, idx) => {
                     html += `
                         <tr>
                             <td>${idx + 1}</td>
-                            <td style="font-weight:bold; font-size:9.5px;">${c.branch}</td>
-                            <td style="font-size:9.5px;">${c.manager}</td>
-                            <td style="font-size:9px;">${c.phone}</td>
-                            <td style="text-align:right; font-size:9.5px; padding-right:5px;">${c.details}</td>
-                            <td style="font-size:8.5px;">${c.types.join(', ')}</td>
+                            <td style="font-weight:bold; font-size:9px;">${c.branch}</td>
+                            <td style="font-size:9px;">${c.manager}</td>
+                            <td style="font-size:8.5px;">${c.phone}</td>
+                            <td style="text-align:right; font-size:9px; padding-right:5px;">${c.details}</td>
+                            <td style="font-size:8px;">${c.types.join(', ')}</td>
                         </tr>
                     `;
                 });
             }
 
-            html += `</tbody></table>`;
-
-            html += `<h4 style="font-size:10px; font-weight:bold; color:#1e3a8a; margin:8px 0 2px 0;">ثانياً: ملخص الشكاوى اليومية وتراكمي المشرفين والنسب:</h4>`;
-            const branchCounts = getManagerBranchCounts();
-            const monthStart = selectedDate.substring(0, 8) + '01';
-            
             html += `
-                <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th style="background-color:#1e3a8a; width:22%;">اسم المشرف</th>
-                            <th style="background-color:#0284c7; width:12%;">اليوم المحدد</th>
-                            <th style="background-color:#0284c7; width:14%;">الإجمالي حتى التاريخ</th>
-                            <th style="background-color:#dc2626; width:12%;">عدد المطاعم</th>
-                            <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف حسب عدد مطاعمه</th>
-                            <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف متوسط 7 مطاعم</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                        </tbody>
+                    </table>
+
+                    <h4 style="font-size:10px; font-weight:bold; color:#1e3a8a; margin:12px 0 3px 0;">ثانياً: ملخص الشكاوى اليومية وتراكمي المشرفين والنسب:</h4>
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th style="background-color:#1e3a8a; width:22%;">اسم المشرف</th>
+                                <th style="background-color:#0284c7; width:12%;">اليوم المحدد</th>
+                                <th style="background-color:#0284c7; width:14%;">الإجمالي حتى التاريخ</th>
+                                <th style="background-color:#dc2626; width:12%;">عدد المطاعم</th>
+                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف حسب عدد مطاعمه</th>
+                                <th style="background-color:#0284c7; width:20%;">نسبة كل مشرف متوسط 7 مطاعم</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
             window.supervisors.forEach(mgr => {
                 const dayC = window.complaints.filter(c => c.manager === mgr && c.date === selectedDate).length;
                 const monthC = window.complaints.filter(c => c.manager === mgr && c.date >= monthStart && c.date <= selectedDate).length;
-                const rBranch = monthC > 0 ? ((monthC / (branchCounts[mgr] || 1)) * 3).toFixed(1) : '0.0';
+                const branchesCnt = branchCounts[mgr] || 0;
+                const rBranch = monthC > 0 ? ((monthC / (branchesCnt || 1)) * 3).toFixed(1) : '0.0';
                 const rAvg7 = monthC > 0 ? ((monthC / 7) * 3).toFixed(1) : '0.0';
 
                 html += `
@@ -1160,22 +1157,24 @@
                         <td style="font-weight:bold; text-align:right; padding-right:8px;">${mgr}</td>
                         <td style="background-color:#e0f2fe; font-weight:bold;">${dayC === 0 ? '-' : dayC}</td>
                         <td style="background-color:#e0f2fe; font-weight:bold;">${monthC === 0 ? '-' : monthC}</td>
-                        <td style="background-color:#fef08a; font-weight:bold;">${branchCounts[mgr] || 0}</td>
+                        <td style="background-color:#fef08a; font-weight:bold;">${branchesCnt}</td>
                         <td style="background-color:#fce7f3; font-weight:bold;">%${rBranch}</td>
                         <td style="background-color:#fce7f3; font-weight:bold;">%${rAvg7}</td>
                     </tr>
                 `;
             });
 
-            html += `</tbody></table>`;
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
             container.innerHTML = html;
         }
 
         function renderReport2(container) {
-            container.className = 'pdf-page-portrait shadow-xl';
             const fromDate = document.getElementById('filter_from').value;
             const toDate = document.getElementById('filter_to').value;
-
             const allTypeNames = window.complaintTypes.map(t => t.name);
             const counts = {};
             allTypeNames.forEach(t => counts[t] = 0);
@@ -1188,20 +1187,20 @@
             const minV = Math.min(...Object.values(counts));
             const total = Object.values(counts).reduce((a,b)=>a+b, 0) || 1;
 
-            let html = getHeaderHTML('تقرير تحليل أنواع وتصنيفات الشكاوى الإجمالي', `الفترة من <b>${fromDate}</b> إلى <b>${toDate}</b>`);
-
-            html += `
-                <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th>م</th>
-                            <th>نوع الشكوى</th>
-                            <th>تصنيف الفئة</th>
-                            <th>عدد الشكاوى</th>
-                            <th>النسبة من الإجمالي</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            let html = `
+                <div class="pdf-page-portrait shadow-xl">
+                    ${getHeaderHTML('تقرير تحليل أنواع وتصنيفات الشكاوى الإجمالي', `الفترة من <b>${fromDate}</b> إلى <b>${toDate}</b>`)}
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th>م</th>
+                                <th>نوع الشكوى</th>
+                                <th>تصنيف الفئة</th>
+                                <th>عدد الشكاوى</th>
+                                <th>النسبة من الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
             window.complaintTypes.forEach((tObj, i) => {
@@ -1223,31 +1222,26 @@
             });
 
             html += `
-                    <tr style="background:#f1f5f9; font-weight:bold;">
-                        <td colspan="3" style="text-align:right; padding-right:15px;">المجموع الإجمالي</td>
-                        <td>${total === 0 ? '-' : total}</td>
-                        <td>100%</td>
-                    </tr>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             `;
             container.innerHTML = html;
         }
 
         function renderReport3(container) {
-            container.className = 'pdf-page-landscape shadow-xl';
             const selectedDate = document.getElementById('filter_date').value;
             const year = selectedDate.substring(0, 4);
             const month = selectedDate.substring(5, 7);
             const daysCount = new Date(year, month, 0).getDate();
 
-            let html = getHeaderHTML(`التقرير اليومي الشامل لإجمالي شكاوى المشرفين (شهر ${month} / ${year})`, `جدول يوضح إجمالي الشكاوى اليومية لكل مشرف طوال أيام الشهر`);
-
-            html += `
-                <table class="pdf-table" style="font-size:7.5px; line-height: 1.1;">
-                    <thead>
-                        <tr>
-                            <th style="width:7%; padding:2px;">التاريخ</th>
+            let html = `
+                <div class="pdf-page-landscape shadow-xl">
+                    ${getHeaderHTML(`التقرير اليومي الشامل لإجمالي شكاوى المشرفين (شهر ${month} / ${year})`, `جدول يوضح إجمالي الشكاوى اليومية لكل مشرف طوال أيام الشهر`)}
+                    <table class="pdf-table" style="font-size:7.5px; line-height: 1.1;">
+                        <thead>
+                            <tr>
+                                <th style="width:7%; padding:2px;">التاريخ</th>
             `;
             window.supervisors.forEach(m => { html += `<th style="padding:2px;">${m}</th>`; });
             html += `<th style="background:#0284c7; width:6%; padding:2px;">المجموع</th></tr></thead><tbody>`;
@@ -1266,19 +1260,16 @@
                 html += `<td style="font-weight:bold; background:#e0f2fe; padding:2px;">${rowSum === 0 ? '-' : rowSum}</td></tr>`;
             }
 
-            html += `</tbody></table>`;
+            html += `</tbody></table></div>`;
             container.innerHTML = html;
         }
 
-        // NEW REPORT: Restaurant & Days Matrix (33 restaurants per page max, vertical/horizontal centered, day numbers only)
         window.renderReportMatrixBranchesPages = function(container) {
-            container.className = 'pdf-page-landscape shadow-xl';
             const selectedDate = document.getElementById('filter_date').value;
             const year = selectedDate.substring(0, 4);
             const month = selectedDate.substring(5, 7);
             const daysCount = new Date(year, month, 0).getDate();
 
-            // Split branches into chunks of 33 max per page
             const chunkSize = 33;
             let chunks = [];
             for (let i = 0; i < window.branches.length; i += chunkSize) {
@@ -1287,32 +1278,31 @@
 
             let fullHtml = '';
             chunks.forEach((chunk, pageIdx) => {
-                fullHtml += `<div class="${pageIdx > 0 ? 'pdf-page-landscape' : ''}" style="page-break-after: always;">`;
-                fullHtml += getHeaderHTML(`تقرير مصفوفة المطاعم وأيام الشهر (الشهر: ${month} / ${year}) - صفحة ${pageIdx + 1} من ${chunks.length}`, `يوضح إجمالي الشكاوى لكل مطعم (33 مطعم كحد أقصى للصفحة) وأرقام أيام الشهر`);
-
                 fullHtml += `
-                    <table class="pdf-table" style="font-size:7px; line-height: 1.1;">
-                        <thead>
-                            <tr>
-                                <th style="width:13%; padding:2px;">اسم المطعم</th>
+                    <div class="pdf-page-landscape shadow-xl page-block" style="margin-bottom: 25px;">
+                        ${getHeaderHTML(`تقرير مصفوفة المطاعم وأيام الشهر (الشهر: ${month} / ${year}) - صفحة ${pageIdx + 1} من ${chunks.length}`, `يوضح إجمالي الشكاوى لكل مطعم (33 مطعم كحد أقصى للصفحة) وأرقام أيام الشهر`)}
+                        <table class="pdf-table matrix-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:13%; padding:3px 2px;">اسم المطعم</th>
                 `;
                 for (let d = 1; d <= daysCount; d++) {
-                    fullHtml += `<th style="padding:1px; width:2.2%;">${d}</th>`;
+                    fullHtml += `<th style="padding:3px 1px; width:2.2%;">${d}</th>`;
                 }
-                fullHtml += `<th style="background:#0284c7; width:5%; padding:2px;">الإجمالي</th></tr></thead><tbody>`;
+                fullHtml += `<th style="background:#0284c7; width:5%; padding:3px 2px;">الإجمالي</th></tr></thead><tbody>`;
 
                 chunk.forEach(b => {
                     let rowSum = 0;
-                    fullHtml += `<tr><td style="font-weight:bold; background:#f1f5f9; text-align:right; padding-right:4px; vertical-align:middle;">${b.name}</td>`;
+                    fullHtml += `<tr><td style="font-weight:bold; background:#f1f5f9; text-align:right; padding-right:5px; vertical-align:middle; font-size:8.5px; line-height:1.4;">${b.name}</td>`;
 
                     for (let d = 1; d <= daysCount; d++) {
                         const dayStr = `${year}-${month}-${d < 10 ? '0' + d : d}`;
                         const cnt = window.complaints.filter(c => c.branch === b.name && c.date === dayStr).length;
                         rowSum += cnt;
-                        fullHtml += `<td style="${cnt > 0 ? 'background-color:#fee2e2; font-weight:bold;' : ''} padding:1px; vertical-align:middle; text-align:center;">${cnt === 0 ? '-' : cnt}</td>`;
+                        fullHtml += `<td style="${cnt > 0 ? 'background-color:#fee2e2; font-weight:bold;' : ''} padding:3px 1px; vertical-align:middle; text-align:center; font-size:8px; line-height:1.4;">${cnt === 0 ? '-' : cnt}</td>`;
                     }
 
-                    fullHtml += `<td style="font-weight:bold; background:#e0f2fe; padding:2px; vertical-align:middle; text-align:center;">${rowSum === 0 ? '-' : rowSum}</td></tr>`;
+                    fullHtml += `<td style="font-weight:bold; background:#e0f2fe; padding:3px 2px; vertical-align:middle; text-align:center; font-size:8.5px; line-height:1.4;">${rowSum === 0 ? '-' : rowSum}</td></tr>`;
                 });
 
                 fullHtml += `</tbody></table></div>`;
@@ -1321,26 +1311,26 @@
             container.innerHTML = fullHtml;
         };
 
+        // تم استعادة تقرير مدير التشغيل ليعرض جميع مطاعم المجموعة كاملة في صفحة واحدة
         function renderReportOps(container, opsName) {
-            container.className = 'pdf-page-portrait shadow-xl';
             const opsBranches = window.branches.filter(b => b.ops === opsName);
             const branchNames = opsBranches.map(b => b.name);
             const opsComplaints = window.complaints.filter(c => branchNames.includes(c.branch));
 
-            let html = getHeaderHTML(`تقرير تقييم أداء مجموعة مدير التشغيل: ${opsName}`, `إجمالي الأفرع: <b>${opsBranches.length} مطعم</b> | إجمالي الشكاوى: <b>${opsComplaints.length} شكوى</b>`);
-
-            html += `
-                <table class="pdf-table" style="font-size:9.5px; line-height: 1.15;">
-                    <thead>
-                        <tr>
-                            <th style="padding:3px;">اسم المطعم</th>
-                            <th style="padding:3px;">مشرف المنطقة</th>
-                            <th style="padding:3px;">عدد الشكاوى</th>
-                            <th style="padding:3px;">نسبة مساهمة المطعم</th>
-                            <th style="padding:3px;">حالة الفرع</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            let html = `
+                <div class="pdf-page-portrait shadow-xl" style="width:794px;">
+                    ${getHeaderHTML(`تقرير تقييم أداء مجموعة مدير التشغيل: ${opsName}`, `إجمالي الأفرع التابعة: <b>${opsBranches.length} مطعم</b> | إجمالي الشكاوى: <b>${opsComplaints.length} شكوى</b>`)}
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th style="padding:4px;">اسم المطعم</th>
+                                <th style="padding:4px;">مشرف المنطقة</th>
+                                <th style="padding:4px;">عدد الشكاوى</th>
+                                <th style="padding:4px;">نسبة مساهمة المطعم</th>
+                                <th style="padding:4px;">حالة الفرع</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
             const totalC = opsComplaints.length || 1;
@@ -1351,48 +1341,48 @@
 
                 html += `
                     <tr>
-                        <td style="font-weight:bold; text-align:right; padding:3px 8px; vertical-align:middle;">${b.name}</td>
-                        <td style="padding:3px; vertical-align:middle;">${b.manager}</td>
-                        <td style="font-weight:bold; font-size:11px; padding:3px; vertical-align:middle;">${cnt === 0 ? '-' : cnt}</td>
-                        <td style="padding:3px; vertical-align:middle;">%${ratio}</td>
-                        <td style="padding:3px; vertical-align:middle;">${status}</td>
+                        <td style="font-weight:bold; text-align:right; padding:3.5px 8px; vertical-align:middle;">${b.name}</td>
+                        <td style="padding:3.5px; vertical-align:middle;">${b.manager}</td>
+                        <td style="font-weight:bold; font-size:11px; padding:3.5px; vertical-align:middle;">${cnt === 0 ? '-' : cnt}</td>
+                        <td style="padding:3.5px; vertical-align:middle;">%${ratio}</td>
+                        <td style="padding:3.5px; vertical-align:middle;">${status}</td>
                     </tr>
                 `;
             });
 
             html += `
-                    <tr style="background:#f1f5f9; font-weight:bold;">
-                        <td colspan="2" style="text-align:right; padding:4px 8px; vertical-align:middle;">إجمالي مجموعة ${opsName}</td>
-                        <td style="padding:4px; vertical-align:middle;">${opsComplaints.length === 0 ? '-' : opsComplaints.length}</td>
-                        <td style="padding:4px; vertical-align:middle;">100%</td>
-                        <td style="padding:4px; vertical-align:middle;">-</td>
-                    </tr>
-                    </tbody>
-                </table>
+                        <tr style="background:#f1f5f9; font-weight:bold;">
+                            <td colspan="2" style="text-align:right; padding:5px 8px; vertical-align:middle;">إجمالي مجموعة ${opsName}</td>
+                            <td style="padding:5px; vertical-align:middle;">${opsComplaints.length === 0 ? '-' : opsComplaints.length}</td>
+                            <td style="padding:5px; vertical-align:middle;">100%</td>
+                            <td style="padding:5px; vertical-align:middle;">-</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             `;
             container.innerHTML = html;
         }
 
         function renderReport4(container) {
-            container.className = 'pdf-page-portrait shadow-xl';
             const counts = {};
             window.complaints.forEach(c => { counts[c.branch] = (counts[c.branch] || 0) + 1; });
             const sorted = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
 
-            let html = getHeaderHTML('تقرير الأفرع الأكثر تسجيل للشكاوى والملاحظات', 'ترتيب الأفرع تنازلياً حسب عدد الشكاوى المسجلة');
-
-            html += `
-                <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th>الترتيب</th>
-                            <th>اسم المطعم / الفرع</th>
-                            <th>مشرف المنطقة</th>
-                            <th>مدير التشغيل</th>
-                            <th>إجمالي الشكاوى</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            let html = `
+                <div class="pdf-page-portrait shadow-xl">
+                    ${getHeaderHTML('تقرير الأفرع الأكثر تسجيل للشكاوى والملاحظات', 'ترتيب الأفرع تنازلياً حسب عدد الشكاوى المسجلة')}
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th>الترتيب</th>
+                                <th>اسم المطعم / الفرع</th>
+                                <th>مشرف المنطقة</th>
+                                <th>مدير التشغيل</th>
+                                <th>إجمالي الشكاوى</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
             sorted.forEach((bName, idx) => {
@@ -1408,140 +1398,222 @@
                 `;
             });
 
-            if (sorted.length === 0) {
-                html += `<tr><td colspan="5" style="padding:10px;">لا توجد شكاوى مسجلة حالياً</td></tr>`;
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
+
+
+        // Build PDF pages by complete table rows. Every continuation page repeats
+        // the report heading and the relevant table heading.
+        async function buildPdfPageBlocks(sourceElements) {
+            const staging = document.createElement('div');
+            staging.style.cssText = 'position:fixed;left:-20000px;top:0;z-index:-1;background:#fff;';
+            document.body.appendChild(staging);
+
+            const output = [];
+            try {
+                for (const source of sourceElements) {
+                    const sourceWidth = Math.round(source.getBoundingClientRect().width || (source.classList.contains('pdf-page-landscape') ? 1123 : 794));
+                    const isLandscape = source.classList.contains('pdf-page-landscape');
+                    const maxHeight = Math.floor(sourceWidth * (isLandscape ? 794 / 1123 : 1123 / 794) - 48);
+                    const tables = Array.from(source.querySelectorAll('table'));
+
+                    if (!tables.length) {
+                        const clone = source.cloneNode(true);
+                        clone.style.margin = '0';
+                        staging.appendChild(clone);
+                        output.push({ element: clone.cloneNode(true), isLandscape });
+                        staging.removeChild(clone);
+                        continue;
+                    }
+
+                    const sourceChildren = Array.from(source.children);
+                    const firstHeader = sourceChildren.find(el => !el.matches('table'));
+                    for (let tableIndex = 0; tableIndex < tables.length; tableIndex++) {
+                        const table = tables[tableIndex];
+                        const tableIndexInParent = sourceChildren.indexOf(table);
+                        let prefixNodes = [];
+
+                        if (tableIndex === 0) {
+                            prefixNodes = sourceChildren.slice(0, tableIndexInParent);
+                        } else {
+                            if (firstHeader) prefixNodes.push(firstHeader);
+                            const previousHeading = sourceChildren.slice(0, tableIndexInParent)
+                                .reverse().find(el => /^H[1-6]$/.test(el.tagName));
+                            if (previousHeading && previousHeading !== firstHeader) prefixNodes.push(previousHeading);
+                        }
+
+                        const rows = Array.from(table.querySelectorAll('tbody tr'));
+                        const thead = table.querySelector('thead');
+                        let rowIndex = 0;
+
+                        do {
+                            const page = source.cloneNode(false);
+                            page.style.width = sourceWidth + 'px';
+                            page.style.margin = '0';
+                            page.style.height = 'auto';
+                            page.style.minHeight = '0';
+                            page.style.boxSizing = 'border-box';
+                            prefixNodes.forEach(node => page.appendChild(node.cloneNode(true)));
+
+                            const tableClone = table.cloneNode(false);
+                            tableClone.style.width = '100%';
+                            tableClone.style.tableLayout = getComputedStyle(table).tableLayout || 'auto';
+                            if (thead) tableClone.appendChild(thead.cloneNode(true));
+                            const tbodyClone = document.createElement('tbody');
+                            tableClone.appendChild(tbodyClone);
+                            page.appendChild(tableClone);
+
+                            staging.appendChild(page);
+                            let addedRows = 0;
+
+                            while (rowIndex < rows.length) {
+                                const rowClone = rows[rowIndex].cloneNode(true);
+                                rowClone.style.breakInside = 'avoid';
+                                rowClone.style.pageBreakInside = 'avoid';
+                                tbodyClone.appendChild(rowClone);
+
+                                const currentHeight = page.getBoundingClientRect().height;
+                                if (currentHeight > maxHeight && addedRows > 0) {
+                                    tbodyClone.removeChild(rowClone);
+                                    break;
+                                }
+                                rowIndex++;
+                                addedRows++;
+
+                                // An individual long row is kept intact; its text wraps instead of being clipped.
+                                if (currentHeight > maxHeight && addedRows === 1) break;
+                            }
+
+                            if (rows.length === 0) rowIndex = 1;
+                            output.push({ element: page.cloneNode(true), isLandscape });
+                            staging.removeChild(page);
+                        } while (rowIndex < rows.length);
+                    }
+                }
+            } finally {
+                staging.remove();
+            }
+            return output;
+        }
+
+        async function savePdfFromReportElements(sourceElements, fileName, logTitle) {
+            if (!sourceElements || !sourceElements.length) {
+                alert('لا يوجد تقرير جاهز للتصدير.');
+                return;
             }
 
-            html += `</tbody></table>`;
-            container.innerHTML = html;
+            let staging = null;
+            try {
+                const pages = await buildPdfPageBlocks(sourceElements);
+                const { jsPDF } = window.jspdf;
+                let pdf = null;
+
+                staging = document.createElement('div');
+                staging.style.cssText = 'position:fixed;left:-20000px;top:0;background:#fff;';
+                document.body.appendChild(staging);
+
+                for (let i = 0; i < pages.length; i++) {
+                    const { element, isLandscape } = pages[i];
+                    staging.appendChild(element);
+
+                    const canvas = await html2canvas(element, {
+                        scale: 2.5,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: element.scrollWidth
+                    });
+
+                    if (!pdf) {
+                        pdf = new jsPDF({
+                            orientation: isLandscape ? 'landscape' : 'portrait',
+                            unit: 'pt',
+                            format: 'a4',
+                            compress: true
+                        });
+                    } else {
+                        pdf.addPage('a4', isLandscape ? 'landscape' : 'portrait');
+                    }
+
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 18;
+                    const availableWidth = pageWidth - margin * 2;
+                    const availableHeight = pageHeight - margin * 2;
+                    const ratio = Math.min(availableWidth / canvas.width, availableHeight / canvas.height);
+                    const imageWidth = canvas.width * ratio;
+                    const imageHeight = canvas.height * ratio;
+                    const x = (pageWidth - imageWidth) / 2;
+
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, margin, imageWidth, imageHeight, undefined, 'FAST');
+                    pdf.setFontSize(7.5);
+                    pdf.setTextColor(120, 120, 120);
+                    pdf.text(`صفحة ${i + 1} من ${pages.length}`, pageWidth / 2, pageHeight - 7, { align: 'center' });
+
+                    staging.removeChild(element);
+                }
+
+                if (pdf) {
+                    pdf.save(fileName);
+                    if (window.logAction) window.logAction('تصدير PDF', logTitle || fileName);
+                }
+            } catch (err) {
+                console.error('PDF export error:', err);
+                alert('حدث خطأ أثناء تجهيز ملف PDF. يرجى المحاولة مرة أخرى.');
+            } finally {
+                if (staging) staging.remove();
+            }
         }
 
         window.exportReportPDF = async function() {
             const container = document.getElementById('reportContainer');
-            try {
-                const canvas = await html2canvas(container, { scale: 2, useCORS: true, logging: false });
-                const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                const { jsPDF } = window.jspdf;
-                
-                const isLandscape = container.classList.contains('pdf-page-landscape') || document.getElementById('reportSelect').value === 'rep_matrix_branches';
-                const pdf = new jsPDF({
-                    orientation: isLandscape ? 'landscape' : 'portrait',
-                    unit: 'pt',
-                    format: 'a4'
-                });
-
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-                
-                let heightLeft = imgHeight;
-                let position = 0;
-                let pageNum = 1;
-
-                pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-                pdf.setFontSize(8);
-                pdf.setTextColor(100, 100, 100);
-                pdf.text(`صفحة ${pageNum}`, pdfWidth - 50, pdfHeight - 15);
-                heightLeft -= pdfHeight;
-
-                while (heightLeft > 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pageNum++;
-                    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-                    pdf.text(`صفحة ${pageNum}`, pdfWidth - 50, pdfHeight - 15);
-                    heightLeft -= pdfHeight;
-                }
-
-                const titleSelect = document.getElementById('reportSelect');
-                const titleText = titleSelect.options[titleSelect.selectedIndex].text.split('(')[0].trim();
-                pdf.save(`شركة_نايف_${titleText}.pdf`);
-                window.logAction('تصدير PDF', `تصدير تقرير (${titleText})`);
-            } catch (err) {
-                console.error(err);
-                alert('حدث خطأ أثناء تصدير ملف الـ PDF');
-            }
+            const pages = Array.from(container.querySelectorAll('.pdf-page-landscape, .pdf-page-portrait'));
+            const titleSelect = document.getElementById('reportSelect');
+            const titleText = titleSelect.options[titleSelect.selectedIndex].text.split('(')[0].trim();
+            await savePdfFromReportElements(pages, `شركة_نايف_${titleText}.pdf`, `تصدير تقرير (${titleText}) بنجاح`);
         };
 
         window.exportComplaintsPDF = async function() {
-            const container = document.createElement('div');
-            container.className = 'pdf-page-portrait shadow-xl';
-            
             const fromDate = document.getElementById('list_from').value;
             const toDate = document.getElementById('list_to').value;
             let filtered = window.complaints;
             if (fromDate) filtered = filtered.filter(c => c.date >= fromDate);
             if (toDate) filtered = filtered.filter(c => c.date <= toDate);
 
+            const container = document.createElement('div');
+            container.className = 'pdf-page-portrait';
+            container.style.width = '794px';
             container.innerHTML = `
                 ${getHeaderHTML('سجل الشكاوى المسجلة بالنظام', `قائمة الشكاوى والملاحظات ${fromDate ? 'من ('+fromDate+')' : ''} ${toDate ? 'إلى ('+toDate+')' : ''}`)}
-                <table class="pdf-table" style="margin-top:10px;">
+                <table class="pdf-table" style="margin-top:10px; table-layout:fixed;">
+                    <colgroup>
+                        <col style="width:5%"><col style="width:12%"><col style="width:15%">
+                        <col style="width:14%"><col style="width:12%"><col style="width:27%"><col style="width:15%">
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th>م</th>
-                            <th>التاريخ</th>
-                            <th>الفرع</th>
-                            <th>المشرف</th>
-                            <th>الهاتف</th>
-                            <th>التفاصيل</th>
-                            <th>التصنيف</th>
+                            <th>م</th><th>التاريخ</th><th>الفرع</th><th>المشرف</th>
+                            <th>الهاتف</th><th>التفاصيل</th><th>التصنيف</th>
                         </tr>
                     </thead>
                     <tbody>
+                        ${filtered.map((c, idx) => `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${c.date || ''}</td>
+                                <td style="font-weight:bold;">${c.branch || ''}</td>
+                                <td>${c.manager || ''}</td>
+                                <td>${c.phone || ''}</td>
+                                <td style="text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:normal;">${c.details || ''}</td>
+                                <td style="white-space:normal;overflow-wrap:anywhere;">${(c.types || []).join(', ')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
             `;
 
-            filtered.forEach((c, idx) => {
-                container.innerHTML += `
-                    <tr>
-                        <td>${idx + 1}</td>
-                        <td>${c.date}</td>
-                        <td style="font-weight:bold;">${c.branch}</td>
-                        <td>${c.manager}</td>
-                        <td>${c.phone}</td>
-                        <td style="text-align:right;">${c.details}</td>
-                        <td>${c.types.join(', ')}</td>
-                    </tr>
-                `;
-            });
-            container.innerHTML += `</tbody></table>`;
-            document.body.appendChild(container);
-
-            try {
-                const canvas = await html2canvas(container, { scale: 2, useCORS: true, logging: false });
-                const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
-
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-                
-                let heightLeft = imgHeight;
-                let position = 0;
-                let pageNum = 1;
-
-                pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-                pdf.setFontSize(8);
-                pdf.text(`صفحة ${pageNum}`, pdfWidth - 50, pdfHeight - 15);
-                heightLeft -= pdfHeight;
-
-                while (heightLeft > 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pageNum++;
-                    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-                    pdf.text(`صفحة ${pageNum}`, pdfWidth - 50, pdfHeight - 15);
-                    heightLeft -= pdfHeight;
-                }
-
-                pdf.save(`شركة_نايف_سجل_الشكاوى.pdf`);
-                window.logAction('تصدير PDF', 'تصدير سجل الشكاوى المسجلة');
-            } catch(err) {
-                console.error(err);
-                alert('حدث خطأ أثناء التصدير');
-            } finally {
-                document.body.removeChild(container);
-            }
+            await savePdfFromReportElements([container], 'شركة_نايف_سجل_الشكاوى.pdf', 'تصدير سجل الشكاوى المسجلة');
         };
     </script>
 </body>
