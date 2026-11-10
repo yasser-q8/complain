@@ -36,7 +36,6 @@
             transition: all 0.2s ease;
         }
 
-        /* توقيع مطور البرنامج */
         .signature-card {
             position: fixed;
             bottom: 12px;
@@ -137,7 +136,7 @@
                 <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" alt="شركة نايف للأغذية" class="h-12 w-12 rounded-full border-2 border-white shadow">
                 <div>
                     <h1 class="text-xl font-extrabold">شركة نايف للأغذية</h1>
-                    <p class="text-xs text-red-100">نظام إدارة وتتبع شكاوى العملاء والمزامنة السحابية الفورية</p>
+                    <p class="text-xs text-red-100">نظام إدارة وتتبع شكاوى العملاء (وضع الحفظ الاقتصادي)</p>
                 </div>
             </div>
             <div class="flex flex-wrap gap-1.5 font-bold">
@@ -252,7 +251,8 @@
                     <div id="dynamicComplaintTypesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs"></div>
                 </div>
 
-                <div class="md:col-span-3 flex justify-end">
+                <div class="md:col-span-3 flex justify-between items-center">
+                    <button type="button" onclick="manualCloudSync()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow transition"><i class="fa-solid fa-cloud-arrow-up ml-1"></i> مزامنة يدوية مع السحابة</button>
                     <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition"><i class="fa-solid fa-floppy-disk ml-1"></i> حفظ وتثبيت الشكوى</button>
                 </div>
             </form>
@@ -565,10 +565,10 @@
         <div class="title">مطور البرنامج 67011143</div>
     </a>
 
-    <!-- Firebase SDK Integration & Realtime Sync -->
+    <!-- Firebase SDK Integration & Safe Sync (No Quota Drain) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, setDoc, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCRHrYb7iSy3d5GiHrspZv-w6ZnVmEeAKg",
@@ -583,6 +583,9 @@
         const db = getFirestore(fbApp);
         window.db = db;
 
+        // تم إيقاف الـ onSnapshot تماماً لمنع استنزاف القراءات اليومية
+        // المزامنة الآن تتم حصراً عند الحفظ أو الضغط على زر المزامنة اليدوية
+
         window.syncToFirebase = async function() {
             try {
                 await setDoc(doc(db, "naif_data", "main_store"), {
@@ -594,9 +597,16 @@
                     complaintTypes: window.complaintTypes,
                     lastUpdated: new Date().toISOString()
                 });
+                console.log("تم مزامنة البيانات بنجاح مع السحابة.");
             } catch (err) {
                 console.error("Firebase sync error:", err);
             }
+        };
+
+        window.manualCloudSync = async function() {
+            alert("جارٍ رفع ومزامنة البيانات مع السحابة...");
+            await window.syncToFirebase();
+            alert("تمت المزامنة اليدوية بنجاح!");
         };
 
         window.loadFromFirebase = async function() {
@@ -622,52 +632,9 @@
                     renderActiveReport();
                 }
             } catch (err) {
-                console.error("Load cloud error:", err);
+                console.error("Load cloud error (Quota may exceed):", err);
             }
         };
-
-        // المزامنة تتم دون عمل Refresh للصفحة
-        onSnapshot(doc(db, "naif_data", "main_store"), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                let needsRefresh = false;
-                if (data.branches && JSON.stringify(data.branches) !== JSON.stringify(window.branches)) {
-                    window.branches = data.branches;
-                    needsRefresh = true;
-                }
-                if (data.complaints) {
-                    const mappedComplaints = data.complaints.map(c => ({ source: 'نايف', ...c }));
-                    if (JSON.stringify(mappedComplaints) !== JSON.stringify(window.complaints)) {
-                        window.complaints = mappedComplaints;
-                        needsRefresh = true;
-                    }
-                }
-                if (data.supervisors && JSON.stringify(data.supervisors) !== JSON.stringify(window.supervisors)) {
-                    window.supervisors = data.supervisors;
-                    needsRefresh = true;
-                }
-                if (data.opsManagers && JSON.stringify(data.opsManagers) !== JSON.stringify(window.opsManagers)) {
-                    window.opsManagers = data.opsManagers;
-                    needsRefresh = true;
-                }
-                if (data.complaintTypes && JSON.stringify(data.complaintTypes) !== JSON.stringify(window.complaintTypes)) {
-                    window.complaintTypes = data.complaintTypes;
-                    renderComplaintTypesForm();
-                    needsRefresh = true;
-                }
-
-                if (needsRefresh) {
-                    window.saveDataLocal();
-                    renderSupervisorsDropdown();
-                    renderOpsDropdown();
-                    updateStats();
-                    renderComplaintsList();
-                    renderAuditTable();
-                    renderSettingsUI();
-                    renderActiveReport();
-                }
-            }
-        });
 
         window.loadFromFirebase();
     </script>
@@ -1097,7 +1064,7 @@
                 updateStats();
                 renderComplaintsList();
                 
-                alert('تم حفظ الشكوى بنجاح!');
+                alert('تم حفظ الشكوى بنجاح محلياً ومزامنتها!');
 
                 this.reset();
                 const today = new Date();
@@ -2097,7 +2064,6 @@
             container.innerHTML = fullHtml;
         };
 
-        // تعديل تقرير مدير التشغيل ليشمل 3 درجات لحالة المطعم
         function renderReportOps(container, opsName) {
             const opsBranches = window.branches.filter(b => b.ops === opsName);
             const branchNames = opsBranches.map(b => b.name);
@@ -2124,7 +2090,6 @@
                 const cnt = opsComplaints.filter(c => c.branch === b.name).length;
                 const ratio = cnt > 0 ? '%' + ((cnt / totalC) * 100).toFixed(1) : '-';
                 
-                // إضافة ثلاث درجات لحالة المطعم بناء على طلب المستخدم
                 let status = '';
                 if (cnt === 0) {
                     status = '<span style="color:#16a34a; font-weight:bold;">ممتاز</span>';
@@ -2377,7 +2342,6 @@
             await savePdfFromReportElements(pages, `شركة_نايف_${titleText}.pdf`, `تصدير تقرير (${titleText}) بنجاح`);
         };
 
-        // تعديل تصدير سجل الشكاوى ليكون Landscape بمساحات واسعة ومريحة
         window.exportComplaintsPDF = async function() {
             const fromDate = document.getElementById('list_from').value;
             const toDate = document.getElementById('list_to').value;
