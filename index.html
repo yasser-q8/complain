@@ -110,6 +110,23 @@
         .pdf-page-portrait, .pdf-page-landscape { overflow: visible; }
 
         .checkbox-lg { width: 1.2rem; height: 1.2rem; accent-color: #dc2626; cursor: pointer; }
+        
+        /* تنسيق صور الشكاوى المتميزة */
+        .complaint-thumb {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .complaint-thumb:hover {
+            transform: scale(1.8);
+            z-index: 50;
+            border-color: #dc2626;
+        }
     </style>
 </head>
 <body>
@@ -125,20 +142,20 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-1.5 font-bold">
-                <button onclick="showTab('entry')" id="btn-entry" class="nav-btn bg-red-900 text-white rounded-lg shadow"><i class="fa-solid fa-plus-circle ml-1"></i> تسجيل شكوى</button>
-                <button onclick="showTab('reports')" id="btn-reports" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-file-invoice ml-1"></i> التقارير والـ PDF</button>
-                <button onclick="showTab('list')" id="btn-list" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-list-check ml-1"></i> سجل الشكاوى</button>
-                <button onclick="checkPasswordAndShowTab('audit')" id="btn-audit" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-shield-halved ml-1"></i> سجل الحركات</button>
-                <button onclick="showTab('settings')" id="btn-settings" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-gears ml-1"></i> الإعدادات</button>
+                <button type="button" onclick="showTab('entry')" id="btn-entry" class="nav-btn bg-red-900 text-white rounded-lg shadow"><i class="fa-solid fa-plus-circle ml-1"></i> تسجيل شكوى</button>
+                <button type="button" onclick="showTab('reports')" id="btn-reports" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-file-invoice ml-1"></i> التقارير والـ PDF</button>
+                <button type="button" onclick="showTab('list')" id="btn-list" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-list-check ml-1"></i> سجل الشكاوى</button>
+                <button type="button" onclick="checkPasswordAndShowTab('audit')" id="btn-audit" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-shield-halved ml-1"></i> سجل الحركات</button>
+                <button type="button" onclick="showTab('settings')" id="btn-settings" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-gears ml-1"></i> الإعدادات</button>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-5">
 
-        <!-- STATS CARDS (تظهر فقط في شاشة سجل الشكاوى وفي صف واحد مصغر) -->
-        <div id="statsCardsContainer" class="hidden grid grid-cols-4 gap-2 md:gap-3 mb-6 no-print">
-            <div class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-red-600 stat-card-float">
+        <!-- STATS CARDS (تظهر في تسجيل الشكاوى وسجل الشكاوى بدون تغيير شكلها المربع) -->
+        <div id="statsCardsContainer" class="grid grid-cols-4 gap-2 md:gap-3 mb-6 no-print">
+            <div onclick="goToRecordListWithFilter('all')" class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-red-600 stat-card-float cursor-pointer hover:bg-slate-50 transition">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-[10px] md:text-xs font-bold text-slate-500">إجمالي الشكاوى</p>
@@ -147,7 +164,7 @@
                     <div class="bg-red-100 p-2 rounded-full text-red-600"><i class="fa-solid fa-bullhorn text-sm md:text-base"></i></div>
                 </div>
             </div>
-            <div class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-blue-600 stat-card-float" style="animation-delay: 0.3s;">
+            <div onclick="goToRecordListWithFilter('today')" class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-blue-600 stat-card-float cursor-pointer hover:bg-slate-50 transition" style="animation-delay: 0.3s;">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-[10px] md:text-xs font-bold text-slate-500">شكاوى اليوم</p>
@@ -178,10 +195,22 @@
 
         <!-- TAB 1: FORM -->
         <section id="tab-entry" class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <h2 class="text-base font-bold text-slate-800 border-b pb-3 mb-4 flex items-center">
-                <i class="fa-solid fa-pen-nib text-red-600 ml-2"></i> تسجيل شكوى عميل جديدة (جميع الحقول إجبارية)
-            </h2>
-            <form id="complaintForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-wrap justify-between items-center border-b pb-3 mb-4 gap-2">
+                <h2 class="text-base font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-pen-nib text-red-600 ml-2"></i> تسجيل شكوى عميل جديدة (جميع الحقول إجبارية)
+                </h2>
+                <!-- روابط تفاعلية سريعة -->
+                <div class="flex items-center gap-2 text-xs font-bold">
+                    <button type="button" onclick="goToRecordListWithFilter('all')" class="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg border border-red-200 transition shadow-sm">
+                        <i class="fa-solid fa-bullhorn ml-1"></i> إجمالي الشكاوى (<span id="quick_stat_total">0</span>)
+                    </button>
+                    <button type="button" onclick="goToRecordListWithFilter('today')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-200 transition shadow-sm">
+                        <i class="fa-solid fa-calendar-day ml-1"></i> شكاوى اليوم (<span id="quick_stat_today">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <form id="complaintForm" onsubmit="handleComplaintSubmit(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ الشكوى <span class="text-red-500">*</span></label>
                     <input type="date" id="c_date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
@@ -194,10 +223,10 @@
                         <option value="كيتا">كيتا</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">اسم الفرع (ابحث بالحروف) <span class="text-red-500">*</span></label>
-                    <input list="branchesList" id="c_branch" required placeholder="اكتب للبحث السريع..." onchange="autoAssignDetails()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
-                    <datalist id="branchesList"></datalist>
+                <div class="relative">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">اسم الفرع (اكتب حرفاً للبحث الفوري) <span class="text-red-500">*</span></label>
+                    <input type="text" id="c_branch" required placeholder="اكتب للبحث السريع..." autocomplete="off" oninput="filterBranchesInput(this.value)" onfocus="filterBranchesInput(this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 bg-white">
+                    <div id="branchDropdown" class="absolute z-50 bg-white border border-slate-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden w-full mt-1"></div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">مشرف المنطقة (تلقائي)</label>
@@ -211,9 +240,13 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">رقم هاتف العميل (أرقام فقط - 8 خانات فأكثر) <span class="text-red-500">*</span></label>
                     <input type="tel" id="c_phone" required placeholder="مثال: 90958919" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
                 </div>
-                <div class="md:col-span-3">
+                <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-slate-700 mb-1">تفاصيل الشكوى وملاحظات العميل <span class="text-red-500">*</span></label>
                     <input type="text" id="c_details" required placeholder="اكتب تفاصيل الشكوى بالكامل هنا..." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">إرفاق صورة للشكوى (اختياري)</label>
+                    <input type="file" id="c_image" accept="image/*" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50">
                 </div>
 
                 <div class="md:col-span-3 bg-slate-50 p-4 rounded-lg border border-slate-200 mt-2">
@@ -258,7 +291,7 @@
                     </div>
                 </div>
 
-                <button onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير وفتح التقرير PDF</button>
+                <button type="button" onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير وفتح التقرير PDF</button>
             </div>
 
             <!-- Report Rendering Box -->
@@ -281,9 +314,9 @@
                     <input type="date" id="list_from" class="border border-slate-300 rounded p-1 text-xs">
                     <span class="text-xs">إلى</span>
                     <input type="date" id="list_to" class="border border-slate-300 rounded p-1 text-xs">
-                    <button onclick="renderComplaintsList()" class="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 rounded text-xs font-bold shadow"><i class="fa-solid fa-filter ml-1"></i> إظهار الشكاوى</button>
-                    <button onclick="resetListFilter()" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded text-xs font-bold">الكل</button>
-                    <button onclick="exportComplaintsPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-3 py-1.5 rounded text-xs shadow flex items-center"><i class="fa-solid fa-file-pdf ml-1"></i> تصدير PDF</button>
+                    <button type="button" onclick="renderComplaintsList()" class="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 rounded text-xs font-bold shadow"><i class="fa-solid fa-filter ml-1"></i> إظهار الشكاوى</button>
+                    <button type="button" onclick="resetListFilter()" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded text-xs font-bold">الكل</button>
+                    <button type="button" onclick="exportComplaintsPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-3 py-1.5 rounded text-xs shadow flex items-center"><i class="fa-solid fa-file-pdf ml-1"></i> تصدير PDF</button>
                 </div>
             </div>
 
@@ -297,6 +330,7 @@
                             <th class="p-2.5">الفرع</th>
                             <th class="p-2.5">مشرف المنطقة</th>
                             <th class="p-2.5">الهاتف</th>
+                            <th class="p-2.5">صورة</th>
                             <th class="p-2.5">تفاصيل الشكوى</th>
                             <th class="p-2.5">التصنيف</th>
                             <th class="p-2.5 text-center">إجراءات</th>
@@ -316,8 +350,8 @@
                 <div class="w-full md:w-72">
                     <div class="flex flex-wrap gap-2">
                         <input type="text" id="auditSearch" onkeyup="renderAuditTable()" placeholder="بحث شامل في الحركات بالحرف..." class="border border-slate-300 rounded-lg p-2 text-xs flex-1">
-                        <button onclick="deleteSelectedAuditLogs()" class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-xs font-bold">حذف الحركات المحددة</button>
-                        <button onclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover:bg-slate-300 rounded-lg px-3 py-2 text-xs font-bold">تحديد الكل</button>
+                        <button type="button" onclick="deleteSelectedAuditLogs()" class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-xs font-bold">حذف الحركات المحددة</button>
+                        <button type="button" onclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover:bg-slate-300 rounded-lg px-3 py-2 text-xs font-bold">تحديد الكل</button>
                     </div>
                 </div>
             </div>
@@ -350,7 +384,7 @@
                     <p class="text-xs text-slate-500">حفظ نسخة من قاعدة البيانات أو استعادتها.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="exportBackup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow"><i class="fa-solid fa-download ml-1"></i> تحميل نسخة احتياطية</button>
+                    <button type="button" onclick="exportBackup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow"><i class="fa-solid fa-download ml-1"></i> تحميل نسخة احتياطية</button>
                     <label class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow cursor-pointer">
                         <i class="fa-solid fa-upload ml-1"></i> استعادة البيانات <input type="file" id="restoreFile" onchange="importBackup(event)" class="hidden" accept=".json">
                     </label>
@@ -361,8 +395,8 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- إدارة مشرفي المنطقة -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مشرفي المنطقة (تعديل / حذف / إضافة) - بدون كلمة مرور</h3>
-                    <form id="addSuperForm" class="flex gap-2 mb-3">
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مشرفي المنطقة (تعديل / حذف / إضافة)</h3>
+                    <form id="addSuperForm" onsubmit="handleAddSuperSubmit(event)" class="flex gap-2 mb-3">
                         <input type="text" id="new_super_name" required placeholder="اسم المشرف الجديد..." class="border border-slate-300 rounded p-2 text-xs flex-1">
                         <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold px-3 py-2 rounded text-xs"><i class="fa-solid fa-plus"></i></button>
                     </form>
@@ -371,18 +405,18 @@
 
                 <!-- إدارة مديري التشغيل -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مديري التشغيل (تعديل / حذف / إضافة) - بدون كلمة مرور</h3>
-                    <form id="addOpsForm" class="flex gap-2 mb-3">
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مديري التشغيل (تعديل / حذف / إضافة)</h3>
+                    <form id="addOpsForm" onsubmit="handleAddOpsSubmit(event)" class="flex gap-2 mb-3">
                         <input type="text" id="new_ops_name" required placeholder="اسم مدير التشغيل الجديد..." class="border border-slate-300 rounded p-2 text-xs flex-1">
                         <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-2 rounded text-xs"><i class="fa-solid fa-plus"></i></button>
                     </form>
                     <div id="opsListContainer" class="max-h-48 overflow-y-auto space-y-2"></div>
                 </div>
 
-                <!-- إدارة أنواع وفئات الشكاوى (بدون كلمة مرور) -->
+                <!-- إدارة أنواع وفئات الشكاوى -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة أنواع وفئات الشكاوى (بدون كلمة مرور)</h3>
-                    <form id="addCompTypeForm" class="space-y-2 mb-3">
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة أنواع وفئات الشكاوى (إضافة / حذف)</h3>
+                    <form id="addCompTypeForm" onsubmit="handleAddCompTypeSubmit(event)" class="space-y-2 mb-3">
                         <input type="text" id="new_type_name" required placeholder="اسم نوع الشكوى الفرعي..." class="w-full border border-slate-300 rounded p-2 text-xs">
                         <input type="text" id="new_type_category" required list="categoriesDatalist" placeholder="اسم الفئة الرئيسية..." class="w-full border border-slate-300 rounded p-2 text-xs font-bold">
                         <datalist id="categoriesDatalist">
@@ -399,8 +433,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">إضافة مطعم / فرع جديد (بدون كلمة مرور)</h3>
-                    <form id="addBranchForm" class="space-y-3">
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">إضافة مطعم / فرع جديد</h3>
+                    <form id="addBranchForm" onsubmit="handleAddBranchSubmit(event)" class="space-y-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">اسم المطعم جديد</label>
                             <input type="text" id="new_branch_name" required class="w-full border border-slate-300 rounded p-2 text-xs">
@@ -418,7 +452,7 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">قائمة الأفرع (تعديل الاسم، المشرف، ومدير التشغيل - بدون كلمة مرور)</h3>
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">قائمة الأفرع (تعديل الاسم، المشرف، ومدير التشغيل)</h3>
                     <div class="max-h-96 overflow-y-auto border border-slate-200 rounded-lg">
                         <table class="w-full text-xs text-right border-collapse">
                             <thead class="bg-slate-700 text-white sticky top-0">
@@ -443,21 +477,21 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
                 <h3 class="text-lg font-bold text-slate-800">تفاصيل الشكوى المسجلة</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
+                <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
             </div>
             <div id="modalBody" class="space-y-3 text-sm"></div>
             <div class="mt-6 flex justify-end">
-                <button onclick="closeModal()" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-bold">إغلاق</button>
+                <button type="button" onclick="closeModal()" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-bold">إغلاق</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal for Editing Complaint (Without Password) -->
+    <!-- Modal for Editing Complaint -->
     <div id="editComplaintModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 no-print">
         <div class="bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 class="text-base font-bold text-slate-850"><i class="fa-solid fa-pen-to-square text-blue-600 ml-1"></i> تعديل بيانات الشكوى (بدون كلمة مرور)</h3>
-                <button onclick="closeEditComplaintModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
+                <h3 class="text-base font-bold text-slate-850"><i class="fa-solid fa-pen-to-square text-blue-600 ml-1"></i> تعديل بيانات الشكوى</h3>
+                <button type="button" onclick="closeEditComplaintModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
             </div>
             <form id="editComplaintForm" onsubmit="saveEditedComplaint(event)" class="space-y-3 text-xs">
                 <input type="hidden" id="edit_c_id">
@@ -479,9 +513,10 @@
                     <label class="block font-bold text-slate-700 mb-1">رقم هاتف العميل (8 أرقام فأكثر)</label>
                     <input type="tel" id="edit_c_phone" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-slate-300 rounded p-2 text-xs">
                 </div>
-                <div>
+                <div class="relative">
                     <label class="block font-bold text-slate-700 mb-1">المطعم / الفرع</label>
-                    <input list="branchesList" id="edit_c_branch" required onchange="autoAssignEditDetails()" class="w-full border border-slate-300 rounded p-2 text-xs">
+                    <input type="text" id="edit_c_branch" required autocomplete="off" oninput="filterEditBranchesInput(this.value)" onfocus="filterEditBranchesInput(this.value)" class="w-full border border-slate-300 rounded p-2 text-xs">
+                    <div id="editBranchDropdown" class="absolute z-50 bg-white border border-slate-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden w-full mt-1"></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
@@ -496,6 +531,10 @@
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">تفاصيل الشكوى</label>
                     <input type="text" id="edit_c_details" required class="w-full border border-slate-300 rounded p-2 text-xs">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">تحديث صورة الشكوى (اختياري)</label>
+                    <input type="file" id="edit_c_image" accept="image/*" class="w-full border border-slate-300 rounded p-1 text-xs bg-slate-50">
                 </div>
                 <div class="bg-slate-50 p-3 rounded border">
                     <label class="block font-bold text-slate-800 mb-2">تصنيفات الشكوى:</label>
@@ -516,8 +555,8 @@
             <p class="text-xs text-slate-500">هذا الإجراء يتطلب إدخال كلمة المرور السرية للمتابعة:</p>
             <input type="password" id="modalPasswordInput" placeholder="أدخل كلمة المرور..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500" onkeydown="if(event.key==='Enter') submitPasswordModal()">
             <div class="flex justify-end space-x-2 space-x-reverse">
-                <button onclick="closePasswordModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded-lg text-xs">إلغاء</button>
-                <button onclick="submitPasswordModal()" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-lg text-xs">تأكيد</button>
+                <button type="button" onclick="closePasswordModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded-lg text-xs">إلغاء</button>
+                <button type="button" onclick="submitPasswordModal()" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-lg text-xs">تأكيد</button>
             </div>
         </div>
     </div>
@@ -528,10 +567,10 @@
         <div class="title">مطور البرنامج 67011143</div>
     </a>
 
-    <!-- Firebase SDK Integration & Realtime Sync -->
+    <!-- Firebase SDK Integration & Single Initial Sync -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, setDoc, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCRHrYb7iSy3d5GiHrspZv-w6ZnVmEeAKg",
@@ -562,7 +601,8 @@
             }
         };
 
-        window.loadFromFirebase = async function() {
+        // الجلب التلقائي مرة واحدة فقط عند فتح الموقع لمنع الشاشة السوداء وتكرار التحديث
+        window.loadFromFirebaseOnce = async function() {
             try {
                 const snap = await getDoc(doc(db, "naif_data", "main_store"));
                 if (snap.exists()) {
@@ -576,20 +616,9 @@
                     if (data.opsManagers) window.opsManagers = data.opsManagers;
                     if (data.complaintTypes) {
                         window.complaintTypes = data.complaintTypes;
-                        const requiredTypes = [
-                            { name: 'تأخير الطلب', category: 'شكاوى شركة طلبات' },
-                            { name: 'اصناف خطأ', category: 'شكاوى شركة طلبات' },
-                            { name: 'تأخير الطلب', category: 'شكاوى شركة كيتا' },
-                            { name: 'اصناف خطأ', category: 'شكاوى شركة كيتا' }
-                        ];
-                        requiredTypes.forEach(rt => {
-                            if (!window.complaintTypes.some(t => t.name === rt.name && t.category === rt.category)) {
-                                window.complaintTypes.push(rt);
-                            }
-                        });
                     }
                     
-                    window.saveDataLocal();
+                    window.saveDataLocal(false);
                     window.initAppUI();
                     updateStats();
                     renderComplaintsList();
@@ -602,51 +631,7 @@
             }
         };
 
-        // Realtime Listener
-        onSnapshot(doc(db, "naif_data", "main_store"), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                let needsRefresh = false;
-                if (data.branches && JSON.stringify(data.branches) !== JSON.stringify(window.branches)) {
-                    window.branches = data.branches;
-                    needsRefresh = true;
-                }
-                if (data.complaints) {
-                    const mappedComplaints = data.complaints.map(c => ({ source: 'نايف', ...c }));
-                    if (JSON.stringify(mappedComplaints) !== JSON.stringify(window.complaints)) {
-                        window.complaints = mappedComplaints;
-                        needsRefresh = true;
-                    }
-                }
-                if (data.supervisors && JSON.stringify(data.supervisors) !== JSON.stringify(window.supervisors)) {
-                    window.supervisors = data.supervisors;
-                    needsRefresh = true;
-                }
-                if (data.opsManagers && JSON.stringify(data.opsManagers) !== JSON.stringify(window.opsManagers)) {
-                    window.opsManagers = data.opsManagers;
-                    needsRefresh = true;
-                }
-                if (data.complaintTypes && JSON.stringify(data.complaintTypes) !== JSON.stringify(window.complaintTypes)) {
-                    window.complaintTypes = data.complaintTypes;
-                    renderComplaintTypesForm();
-                    needsRefresh = true;
-                }
-
-                if (needsRefresh) {
-                    window.saveDataLocal();
-                    updateDatalist();
-                    renderSupervisorsDropdown();
-                    renderOpsDropdown();
-                    updateStats();
-                    renderComplaintsList();
-                    renderAuditTable();
-                    renderSettingsUI();
-                    renderActiveReport();
-                }
-            }
-        });
-
-        window.loadFromFirebase();
+        window.loadFromFirebaseOnce();
     </script>
 
     <script>
@@ -748,8 +733,8 @@
 
         window.branches = JSON.parse(localStorage.getItem('naif_branches')) || defaultBranches;
         window.complaints = JSON.parse(localStorage.getItem('naif_complaints')) || [
-            { id: 1, date: '2026-10-01', source: 'نايف', branch: 'الشويخ واره', manager: 'ثروت المرجاوي', ops: 'طارق بيومي', phone: '90958919', details: 'العميل يشتكي علي جوده الطلب و ناقص 3 بيبسي', types: ['غير مطابق للمواصفات', 'ناقص'] },
-            { id: 2, date: '2026-10-01', source: 'نايف', branch: 'صباح السالم', manager: 'محمد أنور', ops: 'هاني عبدالله', phone: '66637172', details: 'العميل يشتكي من عوار بالبطن', types: ['غير مطابق للمواصفات'] }
+            { id: 1, date: '2026-10-01', source: 'نايف', branch: 'الشويخ واره', manager: 'ثروت المرجاوي', ops: 'طارق بيومي', phone: '90958919', details: 'العميل يشتكي علي جوده الطلب و ناقص 3 بيبسي', types: ['غير مطابق للمواصفات', 'ناقص'], image: '' },
+            { id: 2, date: '2026-10-01', source: 'نايف', branch: 'صباح السالم', manager: 'محمد أنور', ops: 'هاني عبدالله', phone: '66637172', details: 'العميل يشتكي من عوار بالبطن', types: ['غير مطابق للمواصفات'], image: '' }
         ];
 
         window.auditLogs = JSON.parse(localStorage.getItem('naif_audit')) || [
@@ -802,7 +787,6 @@
             }
         };
 
-        // دالة حماية فتح سجل الحركات بكلمة السر
         window.checkPasswordAndShowTab = function(tabName) {
             verifyPassword(() => {
                 showTab(tabName);
@@ -818,13 +802,13 @@
             if (window.syncToFirebase) window.syncToFirebase();
         };
 
-        window.saveDataLocal = function() {
+        window.saveDataLocal = function(shouldSyncCloud = true) {
             localStorage.setItem('naif_branches', JSON.stringify(window.branches));
             localStorage.setItem('naif_complaints', JSON.stringify(window.complaints));
             localStorage.setItem('naif_supervisors', JSON.stringify(window.supervisors));
             localStorage.setItem('naif_ops_managers', JSON.stringify(window.opsManagers));
             localStorage.setItem('naif_comp_types', JSON.stringify(window.complaintTypes));
-            if (window.syncToFirebase) window.syncToFirebase();
+            if (shouldSyncCloud && window.syncToFirebase) window.syncToFirebase();
         };
 
         window.onload = function() {
@@ -844,26 +828,13 @@
             renderAuditTable();
             renderSettingsUI();
             renderActiveReport();
-            if (window.loadFromFirebase) window.loadFromFirebase();
         };
 
         window.initAppUI = function() {
-            updateDatalist();
             renderComplaintTypesForm();
             renderSupervisorsDropdown();
             renderOpsDropdown();
         };
-
-        function updateDatalist() {
-            const list = document.getElementById('branchesList');
-            if(!list) return;
-            list.innerHTML = '';
-            window.branches.forEach(b => {
-                const opt = document.createElement('option');
-                opt.value = b.name;
-                list.appendChild(opt);
-            });
-        }
 
         function renderSupervisorsDropdown() {
             const sel = document.getElementById('new_branch_manager');
@@ -889,6 +860,66 @@
             });
         }
 
+        // إظهار قائمة المطاعم المنسدلة فوراً بدون شاشة سوداء أو Refresh
+        window.filterBranchesInput = function(query) {
+            const dropdown = document.getElementById('branchDropdown');
+            const q = (query || '').trim().toLowerCase();
+            const filtered = window.branches.filter(b => b.name.toLowerCase().includes(q));
+            
+            if (filtered.length === 0) {
+                dropdown.innerHTML = '<div class="p-2 text-xs text-slate-500">لا توجد مطاعم مطابقة</div>';
+            } else {
+                dropdown.innerHTML = filtered.map(b => `
+                    <div onclick="selectBranchItem('${b.name.replace(/'/g, "\\'")}')" class="p-2 hover:bg-red-50 cursor-pointer border-b border-slate-100 text-xs font-bold text-slate-800">
+                        ${b.name} <span class="text-[10px] text-blue-800 font-normal">(${b.manager})</span>
+                    </div>
+                `).join('');
+            }
+            dropdown.classList.remove('hidden');
+        };
+
+        window.selectBranchItem = function(name) {
+            document.getElementById('c_branch').value = name;
+            document.getElementById('branchDropdown').classList.add('hidden');
+            autoAssignDetails();
+        };
+
+        window.filterEditBranchesInput = function(query) {
+            const dropdown = document.getElementById('editBranchDropdown');
+            const q = (query || '').trim().toLowerCase();
+            const filtered = window.branches.filter(b => b.name.toLowerCase().includes(q));
+            
+            if (filtered.length === 0) {
+                dropdown.innerHTML = '<div class="p-2 text-xs text-slate-500">لا توجد مطاعم مطابقة</div>';
+            } else {
+                dropdown.innerHTML = filtered.map(b => `
+                    <div onclick="selectEditBranchItem('${b.name.replace(/'/g, "\\'")}')" class="p-2 hover:bg-blue-50 cursor-pointer border-b border-slate-100 text-xs font-bold text-slate-800">
+                        ${b.name} <span class="text-[10px] text-blue-800 font-normal">(${b.manager})</span>
+                    </div>
+                `).join('');
+            }
+            dropdown.classList.remove('hidden');
+        };
+
+        window.selectEditBranchItem = function(name) {
+            document.getElementById('edit_c_branch').value = name;
+            document.getElementById('editBranchDropdown').classList.add('hidden');
+            autoAssignEditDetails();
+        };
+
+        document.addEventListener('click', function(e) {
+            const bInp = document.getElementById('c_branch');
+            const bDrop = document.getElementById('branchDropdown');
+            if (bInp && bDrop && !bInp.contains(e.target) && !bDrop.contains(e.target)) {
+                bDrop.classList.add('hidden');
+            }
+            const ebInp = document.getElementById('edit_c_branch');
+            const ebDrop = document.getElementById('editBranchDropdown');
+            if (ebInp && ebDrop && !ebInp.contains(e.target) && !ebDrop.contains(e.target)) {
+                ebDrop.classList.add('hidden');
+            }
+        });
+
         function getCategoryCardStyle(catName) {
             if (catName.includes('جودة') || catName.includes('جوده')) {
                 return 'background-color: #fef3c7; border-color: #f59e0b; color: #78350f;';
@@ -903,9 +934,13 @@
             }
         }
 
+        // إنشاء خيارات تصنيف الشكوى بثبات تدم وللأبد دون إعادة مسح عند النقر
         function renderComplaintTypesForm() {
             const container = document.getElementById('dynamicComplaintTypesContainer');
             if(!container) return;
+            
+            // احتفاظ بالخيارات المحددة حالياً إذا كانت موجودة
+            const selectedBefore = Array.from(container.querySelectorAll('input[name="type"]:checked')).map(cb => cb.value);
             container.innerHTML = '';
 
             const categories = {};
@@ -924,7 +959,8 @@
                         <div class="grid grid-cols-1 gap-1.5">
                 `;
                 typesArr.forEach(tName => {
-                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" class="checkbox-lg"> <span>${tName}</span></label>`;
+                    const isChecked = selectedBefore.includes(tName) ? 'checked' : '';
+                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" ${isChecked} class="checkbox-lg"> <span>${tName}</span></label>`;
                 });
                 html += `</div></div>`;
             }
@@ -956,9 +992,8 @@
             activeBtn.classList.remove('bg-red-900', 'text-white');
             activeBtn.classList.add('bg-yellow-500', 'text-slate-900', 'shadow');
 
-            // إظهار كروت الإحصائيات فقط في شاشة "سجل الشكاوى"
             const statsContainer = document.getElementById('statsCardsContainer');
-            if (tabName === 'list') {
+            if (tabName === 'list' || tabName === 'entry') {
                 statsContainer.classList.remove('hidden');
             } else {
                 statsContainer.classList.add('hidden');
@@ -969,7 +1004,23 @@
             if (tabName === 'settings') renderSettingsUI();
         };
 
-        document.getElementById('complaintForm').onsubmit = function(e) {
+        // الانتقال من صفحة تسجيل الشكاوى إلى سجل الشكاوى مع الفلترة المطلوبة
+        window.goToRecordListWithFilter = function(mode) {
+            showTab('list');
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            
+            if (mode === 'today') {
+                document.getElementById('list_from').value = todayStr;
+                document.getElementById('list_to').value = todayStr;
+            } else {
+                document.getElementById('list_from').value = '';
+                document.getElementById('list_to').value = '';
+            }
+            renderComplaintsList();
+        };
+
+        window.handleComplaintSubmit = function(e) {
             e.preventDefault();
             const phoneVal = document.getElementById('c_phone').value.trim();
             if (phoneVal.length < 8) {
@@ -992,39 +1043,61 @@
                 return;
             }
 
-            const newC = {
-                id: Date.now(),
-                date: document.getElementById('c_date').value,
-                source: document.getElementById('c_source').value,
-                branch: foundBranch.name,
-                manager: foundBranch.manager,
-                ops: foundBranch.ops,
-                phone: phoneVal,
-                details: document.getElementById('c_details').value.trim(),
-                types: types
+            const imageInput = document.getElementById('c_image');
+            
+            const processAndSave = (imgData) => {
+                const newC = {
+                    id: Date.now(),
+                    date: document.getElementById('c_date').value,
+                    source: document.getElementById('c_source').value,
+                    branch: foundBranch.name,
+                    manager: foundBranch.manager,
+                    ops: foundBranch.ops,
+                    phone: phoneVal,
+                    details: document.getElementById('c_details').value.trim(),
+                    types: types,
+                    image: imgData || ''
+                };
+
+                window.complaints.push(newC);
+                window.saveDataLocal();
+                window.logAction('تسجيل شكوى', `تسجيل شكوى (مصدر: ${newC.source}) للفرع (${foundBranch.name}) بإشراف (${foundBranch.manager})`);
+                updateStats();
+                renderComplaintsList();
+                
+                alert('تم حفظ الشكوى بنجاح!');
+
+                document.getElementById('complaintForm').reset();
+                const today = new Date();
+                const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+                document.getElementById('c_date').value = todayStr;
+                document.getElementById('c_manager').value = '';
+                document.getElementById('c_ops').value = '';
+                renderComplaintTypesForm();
             };
 
-            window.complaints.push(newC);
-            window.saveDataLocal();
-            window.logAction('تسجيل شكوى', `تسجيل شكوى (مصدر: ${newC.source}) للفرع (${foundBranch.name}) بإشراف (${foundBranch.manager})`);
-            updateStats();
-            renderComplaintsList();
-            
-            alert('تم حفظ الشكوى بنجاح!');
-
-            this.reset();
-            const today = new Date();
-            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-            document.getElementById('c_date').value = todayStr;
-            document.getElementById('c_manager').value = '';
-            document.getElementById('c_ops').value = '';
-            renderComplaintTypesForm();
+            if (imageInput.files && imageInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processAndSave(e.target.result);
+                };
+                reader.readAsDataURL(imageInput.files[0]);
+            } else {
+                processAndSave('');
+            }
         };
 
         function updateStats() {
-            document.getElementById('stat_total').textContent = window.complaints.length;
-            const todayStr = document.getElementById('filter_date').value;
-            document.getElementById('stat_today').textContent = window.complaints.filter(c => c.date === todayStr).length;
+            const totalC = window.complaints.length;
+            document.getElementById('stat_total').textContent = totalC;
+            const quickTotal = document.getElementById('quick_stat_total');
+            if (quickTotal) quickTotal.textContent = totalC;
+
+            const todayStr = document.getElementById('filter_date').value || (new Date().toISOString().split('T')[0]);
+            const todayC = window.complaints.filter(c => c.date === todayStr).length;
+            document.getElementById('stat_today').textContent = todayC;
+            const quickToday = document.getElementById('quick_stat_today');
+            if (quickToday) quickToday.textContent = todayC;
 
             let q = 0, s = 0;
             const qualityNames = window.complaintTypes.filter(t => t.category && t.category.includes('جودة')).map(t => t.name);
@@ -1056,6 +1129,8 @@
 
             filtered.forEach((c, idx) => {
                 const sourceBadge = c.source === 'طلبات' ? 'bg-orange-100 text-orange-800' : (c.source === 'كيتا' ? 'bg-indigo-100 text-indigo-800' : 'bg-red-100 text-red-800');
+                const imageCell = c.image ? `<img src="${c.image}" class="complaint-thumb" alt="صورة الشكوى" onclick="viewFullImage('${c.image}')">` : '<span class="text-slate-400 text-[10px]">بدون صورة</span>';
+                
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-100 transition';
                 tr.innerHTML = `
@@ -1065,16 +1140,22 @@
                     <td class="p-2.5 font-semibold text-slate-800">${c.branch || ''}</td>
                     <td class="p-2.5 text-blue-900 font-bold">${c.manager || ''}</td>
                     <td class="p-2.5">${c.phone || ''}</td>
+                    <td class="p-2.5 text-center">${imageCell}</td>
                     <td class="p-2.5 max-w-xs truncate">${c.details || ''}</td>
                     <td class="p-2.5">${(c.types || []).map(t => `<span class="bg-red-50 text-red-700 text-xs px-1.5 py-0.5 rounded border border-red-200 ml-1">${t}</span>`).join('')}</td>
                     <td class="p-2.5 text-center space-x-2 space-x-reverse">
-                        <button onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold" title="عرض"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="openEditComplaint(${c.id})" class="text-amber-600 hover:text-amber-800 font-bold" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                        <button type="button" onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold" title="عرض"><i class="fa-solid fa-eye"></i></button>
+                        <button type="button" onclick="openEditComplaint(${c.id})" class="text-amber-600 hover:text-amber-800 font-bold" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button type="button" onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        };
+
+        window.viewFullImage = function(imgSrc) {
+            const w = window.open("");
+            w.document.write(`<html dir="rtl"><head><title>صورة الشكوى</title></head><body style="background:#0f172a;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><img src="${imgSrc}" style="max-width:95%;max-height:95%;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5);"></body></html>`);
         };
 
         window.resetListFilter = function() {
@@ -1086,6 +1167,7 @@
         window.viewDetails = function(id) {
             const c = window.complaints.find(x => x.id === id);
             if (!c) return;
+            const imgHtml = c.image ? `<div class="mt-2 text-center"><b class="block mb-1">صورة الشكوى المرفقة:</b><img src="${c.image}" class="max-h-48 mx-auto rounded border shadow cursor-pointer" onclick="viewFullImage('${c.image}')"></div>` : '';
             document.getElementById('modalBody').innerHTML = `
                 <p><b>التاريخ:</b> ${c.date}</p>
                 <p><b>مصدر الشكوى:</b> ${c.source || 'نايف'}</p>
@@ -1095,6 +1177,7 @@
                 <p><b>رقم هاتف العميل:</b> ${c.phone}</p>
                 <p><b>التصنيفات:</b> ${c.types.join(', ')}</p>
                 <div class="bg-slate-100 p-3 rounded-lg border mt-2"><b>تفاصيل الشكوى:</b><br>${c.details}</div>
+                ${imgHtml}
             `;
             document.getElementById('detailsModal').classList.remove('hidden');
         };
@@ -1113,6 +1196,7 @@
             document.getElementById('edit_c_manager').value = c.manager;
             document.getElementById('edit_c_ops').value = c.ops;
             document.getElementById('edit_c_details').value = c.details;
+            document.getElementById('edit_c_image').value = '';
 
             const container = document.getElementById('editComplaintTypesContainer');
             container.innerHTML = '';
@@ -1185,25 +1269,41 @@
 
             const idx = window.complaints.findIndex(x => x.id === id);
             if (idx !== -1) {
-                window.complaints[idx] = {
-                    id: id,
-                    date: document.getElementById('edit_c_date').value,
-                    source: document.getElementById('edit_c_source').value,
-                    branch: foundBranch.name,
-                    manager: foundBranch.manager,
-                    ops: foundBranch.ops,
-                    phone: phoneVal,
-                    details: document.getElementById('edit_c_details').value.trim(),
-                    types: types
+                const existingImage = window.complaints[idx].image || '';
+                const imageInput = document.getElementById('edit_c_image');
+
+                const finalizeEdit = (imgToSave) => {
+                    window.complaints[idx] = {
+                        id: id,
+                        date: document.getElementById('edit_c_date').value,
+                        source: document.getElementById('edit_c_source').value,
+                        branch: foundBranch.name,
+                        manager: foundBranch.manager,
+                        ops: foundBranch.ops,
+                        phone: phoneVal,
+                        details: document.getElementById('edit_c_details').value.trim(),
+                        types: types,
+                        image: imgToSave
+                    };
+
+                    window.saveDataLocal();
+                    window.logAction('تعديل شكوى', `تعديل شكوى الفرع (${foundBranch.name}) رقم السجل (${id})`);
+                    updateStats();
+                    renderComplaintsList();
+                    renderActiveReport();
+                    closeEditComplaintModal();
+                    alert('تم تحديث الشكوى وحفظ التعديلات بنجاح!');
                 };
 
-                window.saveDataLocal();
-                window.logAction('تعديل شكوى', `تعديل شكوى الفرع (${foundBranch.name}) رقم السجل (${id}) بدون كلمة مرور`);
-                updateStats();
-                renderComplaintsList();
-                renderActiveReport();
-                closeEditComplaintModal();
-                alert('تم تحديث الشكوى وحفظ التعديلات بنجاح!');
+                if (imageInput.files && imageInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        finalizeEdit(e.target.result);
+                    };
+                    reader.readAsDataURL(imageInput.files[0]);
+                } else {
+                    finalizeEdit(existingImage);
+                }
             }
         };
 
@@ -1280,15 +1380,15 @@
                     <div class="flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs">
                         <span class="font-bold text-slate-800">${sup}</span>
                         <div class="space-x-1 space-x-reverse">
-                            <button onclick="editSupervisor(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="removeSupervisor(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                            <button type="button" onclick="editSupervisor(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" onclick="removeSupervisor(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        document.getElementById('addSuperForm').onsubmit = function(e) {
+        window.handleAddSuperSubmit = function(e) {
             e.preventDefault();
             const name = document.getElementById('new_super_name').value.trim();
             if (window.supervisors.includes(name)) {
@@ -1315,7 +1415,7 @@
             window.saveDataLocal();
             renderSettingsUI();
             renderComplaintsList();
-            window.logAction('تعديل مشرف', `تعديل اسم المشرف من (${oldName}) إلى (${trimmed}) بدون كلمة مرور`);
+            window.logAction('تعديل مشرف', `تعديل اسم المشرف من (${oldName}) إلى (${trimmed})`);
             alert('تم تعديل اسم المشرف بنجاح.');
         };
 
@@ -1326,7 +1426,7 @@
             window.supervisors.splice(idx, 1);
             window.saveDataLocal();
             renderSettingsUI();
-            window.logAction('حذف مشرف', `حذف مشرف المنطقة (${name}) بدون كلمة مرور`);
+            window.logAction('حذف مشرف', `حذف مشرف المنطقة (${name})`);
             alert('تم حذف المشرف بنجاح.');
         };
 
@@ -1339,15 +1439,15 @@
                     <div class="flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs">
                         <span class="font-bold text-slate-800">${ops}</span>
                         <div class="space-x-1 space-x-reverse">
-                            <button onclick="editOpsManager(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="removeOpsManager(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                            <button type="button" onclick="editOpsManager(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" onclick="removeOpsManager(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        document.getElementById('addOpsForm').onsubmit = function(e) {
+        window.handleAddOpsSubmit = function(e) {
             e.preventDefault();
             const name = document.getElementById('new_ops_name').value.trim();
             if (window.opsManagers.includes(name)) {
@@ -1374,7 +1474,7 @@
             window.saveDataLocal();
             renderSettingsUI();
             renderComplaintsList();
-            window.logAction('تعديل مدير تشغيل', `تعديل اسم مدير التشغيل من (${oldName}) إلى (${trimmed}) بدون كلمة مرور`);
+            window.logAction('تعديل مدير تشغيل', `تعديل اسم مدير التشغيل من (${oldName}) إلى (${trimmed})`);
             alert('تم التعديل بنجاح.');
         };
 
@@ -1389,7 +1489,7 @@
             window.opsManagers.splice(idx, 1);
             window.saveDataLocal();
             renderSettingsUI();
-            window.logAction('حذف مدير تشغيل', `حذف مدير التشغيل (${name}) بدون كلمة مرور`);
+            window.logAction('حذف مدير تشغيل', `حذف مدير التشغيل (${name})`);
             alert('تم الحذف بنجاح.');
         };
 
@@ -1405,15 +1505,15 @@
                             <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded mr-1">${t.category}</span>
                         </div>
                         <div class="space-x-1 space-x-reverse">
-                            <button onclick="editComplaintType(${idx})" class="text-blue-600 hover:text-blue-800 px-1 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="removeComplaintType(${idx})" class="text-red-600 hover:text-red-800 px-1 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                            <button type="button" onclick="editComplaintType(${idx})" class="text-blue-600 hover:text-blue-800 px-1 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" onclick="removeComplaintType(${idx})" class="text-red-600 hover:text-red-800 px-1 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        document.getElementById('addCompTypeForm').onsubmit = function(e) {
+        window.handleAddCompTypeSubmit = function(e) {
             e.preventDefault();
             const tName = document.getElementById('new_type_name').value.trim();
             const tCat = document.getElementById('new_type_category').value.trim();
@@ -1425,9 +1525,9 @@
             window.saveDataLocal();
             renderComplaintTypesForm();
             renderSettingsUI();
-            window.logAction('إضافة نوع شكوى', `إضافة نوع شكوى (${tName}) تحت الفئة الرئيسية (${tCat}) بدون كلمة مرور`);
+            window.logAction('إضافة نوع شكوى', `إضافة نوع شكوى (${tName}) تحت الفئة الرئيسية (${tCat})`);
             alert('تمت إضافة نوع الشكوى بنجاح!');
-            this.reset();
+            document.getElementById('addCompTypeForm').reset();
         };
 
         window.editComplaintType = function(idx) {
@@ -1446,20 +1546,28 @@
             renderComplaintTypesForm();
             renderSettingsUI();
             renderComplaintsList();
-            window.logAction('تعديل نوع شكوى', `تعديل نوع الشكوى من (${oldObj.name}) إلى (${trimmedName}) بدون كلمة مرور`);
+            window.logAction('تعديل نوع شكوى', `تعديل نوع الشكوى من (${oldObj.name}) إلى (${trimmedName})`);
             alert('تم التعديل بنجاح.');
         };
 
+        // إصلاح حذف أنواع الشكاوى نهائياً وتحديث التخزين السحابي فورياً
         window.removeComplaintType = function(idx) {
-            const tName = window.complaintTypes[idx].name;
-            if (!confirm(`هل أنت متأكد من حذف نوع الشكوى (${tName})؟`)) return;
-            
+            const targetType = window.complaintTypes[idx];
+            if (!targetType) return;
+
+            const isUsed = window.complaints.some(c => c.types && c.types.includes(targetType.name));
+            if (isUsed) {
+                if (!confirm(`تحذير: نوع الشكوى (${targetType.name}) مرتبط بشكاوى مسجلة بالفعل. هل أنت متأكد من الحذف؟`)) return;
+            } else {
+                if (!confirm(`هل أنت متأكد من حذف نوع الشكوى (${targetType.name})؟`)) return;
+            }
+
             window.complaintTypes.splice(idx, 1);
-            window.saveDataLocal();
+            window.saveDataLocal(true);
             renderComplaintTypesForm();
-            renderSettingsUI();
-            window.logAction('حذف نوع شكوى', `حذف نوع الشكوى (${tName}) بدون كلمة مرور`);
-            alert('تم الحذف بنجاح.');
+            renderComplaintTypesManagement();
+            window.logAction('حذف نوع شكوى', `حذف نوع الشكوى (${targetType.name}) بنجاح`);
+            alert('تم حذف نوع الشكوى بنجاح وعدم عودتها.');
         };
 
         function renderSettingsTable() {
@@ -1474,12 +1582,12 @@
                 tr.innerHTML = `
                     <td class="p-2 font-bold flex items-center justify-between">
                         <span>${b.name}</span>
-                        <button onclick="editBranchName(${idx})" class="text-blue-600 hover:text-blue-800 text-xs px-1.5 py-0.5" title="تعديل اسم المطعم"><i class="fa-solid fa-pen"></i></button>
+                        <button type="button" onclick="editBranchName(${idx})" class="text-blue-600 hover:text-blue-800 text-xs px-1.5 py-0.5" title="تعديل اسم المطعم"><i class="fa-solid fa-pen"></i></button>
                     </td>
                     <td class="p-2"><select onchange="updateBranchManager(${idx}, this.value)" class="border rounded p-1 w-full text-xs font-bold text-blue-900">${supOptions}</select></td>
                     <td class="p-2"><select onchange="updateBranchOps(${idx}, this.value)" class="border rounded p-1 text-xs">${opsOptions}</select></td>
                     <td class="p-2 text-center">
-                        <button onclick="removeBranch(${idx})" class="bg-red-100 text-red-600 hover:bg-red-200 px-2 py-1 rounded font-bold text-xs"><i class="fa-solid fa-trash ml-1"></i> حذف</button>
+                        <button type="button" onclick="removeBranch(${idx})" class="bg-red-100 text-red-600 hover:bg-red-200 px-2 py-1 rounded font-bold text-xs"><i class="fa-solid fa-trash ml-1"></i> حذف</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1500,26 +1608,23 @@
             window.branches[idx].name = trimmed;
             window.complaints.forEach(c => { if (c.branch === oldName) c.branch = trimmed; });
             window.saveDataLocal();
-            updateDatalist();
             renderSettingsTable();
             renderComplaintsList();
-            window.logAction('تعديل اسم مطعم', `تعديل اسم المطعم من (${oldName}) إلى (${trimmed}) بدون كلمة مرور`);
+            window.logAction('تعديل اسم مطعم', `تعديل اسم المطعم من (${oldName}) إلى (${trimmed})`);
             alert('تم تعديل اسم المطعم بنجاح.');
         };
 
         window.updateBranchManager = function(idx, val) {
-            const oldMgr = window.branches[idx].manager;
             window.branches[idx].manager = val;
             window.saveDataLocal();
-            updateDatalist();
-            window.logAction('تعديل إعدادات', `تغيير مشرف الفرع (${window.branches[idx].name}) إلى (${val}) بدون كلمة مرور`);
+            window.logAction('تعديل إعدادات', `تغيير مشرف الفرع (${window.branches[idx].name}) إلى (${val})`);
             alert('تم تحديث مشرف الفرع بنجاح.');
         };
 
         window.updateBranchOps = function(idx, val) {
             window.branches[idx].ops = val;
             window.saveDataLocal();
-            window.logAction('تعديل إعدادات', `تغيير مدير تشغيل الفرع (${window.branches[idx].name}) إلى (${val}) بدون كلمة مرور`);
+            window.logAction('تعديل إعدادات', `تغيير مدير تشغيل الفرع (${window.branches[idx].name}) إلى (${val})`);
             alert('تم تحديث مدير التشغيل بنجاح.');
         };
 
@@ -1529,13 +1634,12 @@
 
             window.branches.splice(idx, 1);
             window.saveDataLocal();
-            updateDatalist();
             renderSettingsTable();
-            window.logAction('حذف فرع', `حذف المطعم (${bName}) من النظام بدون كلمة مرور`);
+            window.logAction('حذف فرع', `حذف المطعم (${bName}) من النظام`);
             alert('تم حذف المطعم بنجاح.');
         };
 
-        document.getElementById('addBranchForm').onsubmit = function(e) {
+        window.handleAddBranchSubmit = function(e) {
             e.preventDefault();
             const name = document.getElementById('new_branch_name').value.trim();
             const mgr = document.getElementById('new_branch_manager').value;
@@ -1548,11 +1652,10 @@
 
             window.branches.push({ name: name, manager: mgr, ops: ops });
             window.saveDataLocal();
-            updateDatalist();
             renderSettingsTable();
             window.logAction('إضافة فرع', `إضافة مطعم جديد (${name}) بإشراف (${mgr})`);
             alert('تمت إضافة المطعم بنجاح!');
-            this.reset();
+            document.getElementById('addBranchForm').reset();
         };
 
         window.exportBackup = function() {
@@ -1738,9 +1841,10 @@
                                 <th style="width:5%;">م</th>
                                 <th style="width:11%;">المصدر</th>
                                 <th style="width:12%;">الفرع</th>
-                                <th style="width:13%;">المشرف</th>
-                                <th style="width:11%;">الهاتف</th>
-                                <th style="width:38%;">تفاصيل الشكوى</th>
+                                <th style="width:12%;">المشرف</th>
+                                <th style="width:10%;">الهاتف</th>
+                                <th style="width:10%;">صورة</th>
+                                <th style="width:30%;">تفاصيل الشكوى</th>
                                 <th style="width:10%;">التصنيف</th>
                             </tr>
                         </thead>
@@ -1748,9 +1852,10 @@
             `;
 
             if (dayComplaints.length === 0) {
-                html += `<tr><td colspan="7" style="padding:6px; color:#94a3b8;">لا توجد شكاوى مسجلة في هذا اليوم</td></tr>`;
+                html += `<tr><td colspan="8" style="padding:6px; color:#94a3b8;">لا توجد شكاوى مسجلة في هذا اليوم</td></tr>`;
             } else {
                 dayComplaints.forEach((c, idx) => {
+                    const imgTag = c.image ? `<img src="${c.image}" style="width:32px;height:32px;object-fit:cover;border-radius:4px;border:1px solid #cbd5e1;">` : '-';
                     html += `
                         <tr>
                             <td class="report-num" style="padding:2.5px 2px;">${idx + 1}</td>
@@ -1758,6 +1863,7 @@
                             <td style="font-weight:bold; font-size:8.5px; padding:2.5px 2px;">${c.branch}</td>
                             <td style="font-size:8.5px; padding:2.5px 2px;">${c.manager}</td>
                             <td style="font-size:8px; padding:2.5px 2px;" class="report-num">${c.phone}</td>
+                            <td style="text-align:center; padding:2px;">${imgTag}</td>
                             <td style="text-align:right; font-size:8.5px; padding:2.5px 5px;">${c.details}</td>
                             <td style="font-size:7.5px; padding:2.5px 2px;">${c.types.join(', ')}</td>
                         </tr>
@@ -2245,13 +2351,13 @@
                 ${getHeaderHTML('سجل الشكاوى المسجلة بالنظام', `قائمة الشكاوى والملاحظات ${fromDate ? 'من ('+fromDate+')' : ''} ${toDate ? 'إلى ('+toDate+')' : ''}`)}
                 <table class="pdf-table" style="margin-top:10px; table-layout:fixed;">
                     <colgroup>
-                        <col style="width:4%"><col style="width:11%"><col style="width:10%"><col style="width:14%">
-                        <col style="width:13%"><col style="width:11%"><col style="width:26%"><col style="width:11%">
+                        <col style="width:4%"><col style="width:11%"><col style="width:10%"><col style="width:13%">
+                        <col style="width:12%"><col style="width:10%"><col style="width:10%"><col style="width:20%"><col style="width:10%">
                     </colgroup>
                     <thead>
                         <tr>
                             <th>م</th><th>التاريخ</th><th>المصدر</th><th>الفرع</th><th>المشرف</th>
-                            <th>الهاتف</th><th>التفاصيل</th><th>التصنيف</th>
+                            <th>الهاتف</th><th>صورة</th><th>التفاصيل</th><th>التصنيف</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2263,6 +2369,7 @@
                                 <td style="font-weight:bold;">${c.branch || ''}</td>
                                 <td>${c.manager || ''}</td>
                                 <td class="report-num">${c.phone || ''}</td>
+                                <td style="text-align:center;">${c.image ? '<img src="'+c.image+'" style="width:28px;height:28px;object-fit:cover;border-radius:3px;">' : '-'}</td>
                                 <td style="text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:normal;">${c.details || ''}</td>
                                 <td style="white-space:normal;overflow-wrap:anywhere;">${(c.types || []).join(', ')}</td>
                             </tr>
