@@ -26,7 +26,7 @@
         .stat-card-float { animation: floating 4s ease-in-out infinite; }
         @keyframes floating {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
+            50% { transform: translateY(-3px); }
             100% { transform: translateY(0px); }
         }
 
@@ -36,7 +36,7 @@
             transition: all 0.2s ease;
         }
 
-        /* توقيع مطور البرنامج (مُصغر 30%) */
+        /* توقيع مطور البرنامج */
         .signature-card {
             position: fixed;
             bottom: 12px;
@@ -109,10 +109,10 @@
         .pdf-table tr { break-inside: avoid; page-break-inside: avoid; }
         .pdf-page-portrait, .pdf-page-landscape { overflow: visible; }
 
-        .checkbox-lg { width: 1.3rem; height: 1.3rem; accent-color: #dc2626; cursor: pointer; }
+        .checkbox-lg { width: 1.2rem; height: 1.2rem; accent-color: #dc2626; cursor: pointer; }
     </style>
 </head>
-<body onclick="triggerDataSync()">
+<body>
 
     <!-- Header / Navbar -->
     <header class="bg-red-800 text-white shadow-lg no-print border-b-4 border-yellow-500">
@@ -128,7 +128,7 @@
                 <button onclick="showTab('entry')" id="btn-entry" class="nav-btn bg-red-900 text-white rounded-lg shadow"><i class="fa-solid fa-plus-circle ml-1"></i> تسجيل شكوى</button>
                 <button onclick="showTab('reports')" id="btn-reports" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-file-invoice ml-1"></i> التقارير والـ PDF</button>
                 <button onclick="showTab('list')" id="btn-list" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-list-check ml-1"></i> سجل الشكاوى</button>
-                <button onclick="showTab('audit')" id="btn-audit" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-shield-halved ml-1"></i> سجل الحركات</button>
+                <button onclick="checkPasswordAndShowTab('audit')" id="btn-audit" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-shield-halved ml-1"></i> سجل الحركات</button>
                 <button onclick="showTab('settings')" id="btn-settings" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-gears ml-1"></i> الإعدادات</button>
             </div>
         </div>
@@ -136,42 +136,42 @@
 
     <main class="max-w-7xl mx-auto px-4 py-5">
 
-        <!-- STATS CARDS -->
-        <div id="statsCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 no-print">
-            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-red-600 stat-card-float">
+        <!-- STATS CARDS (تظهر فقط في شاشة سجل الشكاوى وفي صف واحد مصغر) -->
+        <div id="statsCardsContainer" class="hidden grid grid-cols-4 gap-2 md:gap-3 mb-6 no-print">
+            <div class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-red-600 stat-card-float">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-xs font-bold text-slate-500">إجمالي الشكاوى</p>
-                        <h3 id="stat_total" class="text-2xl font-black text-slate-800">0</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-500">إجمالي الشكاوى</p>
+                        <h3 id="stat_total" class="text-base md:text-xl font-black text-slate-800">0</h3>
                     </div>
-                    <div class="bg-red-100 p-3 rounded-full text-red-600"><i class="fa-solid fa-bullhorn text-xl"></i></div>
+                    <div class="bg-red-100 p-2 rounded-full text-red-600"><i class="fa-solid fa-bullhorn text-sm md:text-base"></i></div>
                 </div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-blue-600 stat-card-float" style="animation-delay: 0.3s;">
+            <div class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-blue-600 stat-card-float" style="animation-delay: 0.3s;">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-xs font-bold text-slate-500">شكاوى اليوم</p>
-                        <h3 id="stat_today" class="text-2xl font-black text-slate-800">0</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-500">شكاوى اليوم</p>
+                        <h3 id="stat_today" class="text-base md:text-xl font-black text-slate-800">0</h3>
                     </div>
-                    <div class="bg-blue-100 p-3 rounded-full text-blue-600"><i class="fa-solid fa-calendar-day text-xl"></i></div>
+                    <div class="bg-blue-100 p-2 rounded-full text-blue-600"><i class="fa-solid fa-calendar-day text-sm md:text-base"></i></div>
                 </div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-amber-500 stat-card-float" style="animation-delay: 0.6s;">
+            <div class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-amber-500 stat-card-float" style="animation-delay: 0.6s;">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-xs font-bold text-slate-500">شكاوى الجودة</p>
-                        <h3 id="stat_quality" class="text-2xl font-black text-slate-800">0</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-500">شكاوى الجودة</p>
+                        <h3 id="stat_quality" class="text-base md:text-xl font-black text-slate-800">0</h3>
                     </div>
-                    <div class="bg-amber-100 p-3 rounded-full text-amber-600"><i class="fa-solid fa-utensils text-xl"></i></div>
+                    <div class="bg-amber-100 p-2 rounded-full text-amber-600"><i class="fa-solid fa-utensils text-sm md:text-base"></i></div>
                 </div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-emerald-500 stat-card-float" style="animation-delay: 0.9s;">
+            <div class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-emerald-500 stat-card-float" style="animation-delay: 0.9s;">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-xs font-bold text-slate-500">شكاوى الخدمة</p>
-                        <h3 id="stat_service" class="text-2xl font-black text-slate-800">0</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-500">شكاوى الخدمة</p>
+                        <h3 id="stat_service" class="text-base md:text-xl font-black text-slate-800">0</h3>
                     </div>
-                    <div class="bg-emerald-100 p-3 rounded-full text-emerald-600"><i class="fa-solid fa-truck-fast text-xl"></i></div>
+                    <div class="bg-emerald-100 p-2 rounded-full text-emerald-600"><i class="fa-solid fa-truck-fast text-sm md:text-base"></i></div>
                 </div>
             </div>
         </div>
@@ -218,7 +218,7 @@
 
                 <div class="md:col-span-3 bg-slate-50 p-4 rounded-lg border border-slate-200 mt-2">
                     <label class="block text-xs font-bold text-slate-800 mb-3">تصنيف الشكوى (اختر تصنيفاً واحداً على الأقل) <span class="text-red-500">*</span></label>
-                    <div id="dynamicComplaintTypesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs"></div>
+                    <div id="dynamicComplaintTypesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs"></div>
                 </div>
 
                 <div class="md:col-span-3 flex justify-end">
@@ -509,7 +509,7 @@
         </div>
     </div>
 
-    <!-- Secure Password Modal (Only for Backup/Restore & Audit logs deletion if needed) -->
+    <!-- Secure Password Modal -->
     <div id="passwordModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4 no-print">
         <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
             <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-lock text-red-600 ml-1"></i> إدخال كلمة المرور</h3>
@@ -562,14 +562,13 @@
             }
         };
 
-        window.loadFromFirebase = async function(isSilent = false) {
+        window.loadFromFirebase = async function() {
             try {
                 const snap = await getDoc(doc(db, "naif_data", "main_store"));
                 if (snap.exists()) {
                     const data = snap.data();
                     if (data.branches) window.branches = data.branches;
                     if (data.complaints) {
-                        // التأكد من وجود حقل المصدر للشكاوى القديمة
                         window.complaints = data.complaints.map(c => ({ source: 'نايف', ...c }));
                     }
                     if (data.auditLogs) window.auditLogs = data.auditLogs;
@@ -577,7 +576,6 @@
                     if (data.opsManagers) window.opsManagers = data.opsManagers;
                     if (data.complaintTypes) {
                         window.complaintTypes = data.complaintTypes;
-                        // ضمان وجود فئات طلبات وكيتا الفرعية والرئيسية
                         const requiredTypes = [
                             { name: 'تأخير الطلب', category: 'شكاوى شركة طلبات' },
                             { name: 'اصناف خطأ', category: 'شكاوى شركة طلبات' },
@@ -604,7 +602,7 @@
             }
         };
 
-        // Realtime Listener for Instant Updates from other devices
+        // Realtime Listener
         onSnapshot(doc(db, "naif_data", "main_store"), (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
@@ -630,12 +628,15 @@
                 }
                 if (data.complaintTypes && JSON.stringify(data.complaintTypes) !== JSON.stringify(window.complaintTypes)) {
                     window.complaintTypes = data.complaintTypes;
+                    renderComplaintTypesForm();
                     needsRefresh = true;
                 }
 
                 if (needsRefresh) {
                     window.saveDataLocal();
-                    window.initAppUI();
+                    updateDatalist();
+                    renderSupervisorsDropdown();
+                    renderOpsDropdown();
                     updateStats();
                     renderComplaintsList();
                     renderAuditTable();
@@ -758,13 +759,6 @@
         const PASS = "123321";
         let passwordCallback = null;
 
-        // دالة لتحديث البيانات فوراً عند أي ضغطة زر أو تفاعل
-        window.triggerDataSync = function() {
-            if (window.loadFromFirebase) {
-                window.loadFromFirebase(true);
-            }
-        };
-
         function getDeviceInfo() {
             const ua = navigator.userAgent;
             let deviceType = "كمبيوتر مكتبي / لابتوب";
@@ -806,6 +800,13 @@
                 document.getElementById('modalPasswordInput').value = '';
                 document.getElementById('modalPasswordInput').focus();
             }
+        };
+
+        // دالة حماية فتح سجل الحركات بكلمة السر
+        window.checkPasswordAndShowTab = function(tabName) {
+            verifyPassword(() => {
+                showTab(tabName);
+            });
         };
 
         window.logAction = function(type, details) {
@@ -888,18 +889,17 @@
             });
         }
 
-        // ألوان خلفيات الكروت حسب الفئة الرئيسية (مع ألوان متميزة لطلبات وكيتا)
         function getCategoryCardStyle(catName) {
             if (catName.includes('جودة') || catName.includes('جوده')) {
-                return 'background-color: #fef3c7; border-color: #f59e0b; color: #78350f;'; // Amber/Yellow
+                return 'background-color: #fef3c7; border-color: #f59e0b; color: #78350f;';
             } else if (catName.includes('خدمة') || catName.includes('توصيل')) {
-                return 'background-color: #d1fae5; border-color: #10b981; color: #065f46;'; // Emerald/Green
+                return 'background-color: #d1fae5; border-color: #10b981; color: #065f46;';
             } else if (catName.includes('طلبات')) {
-                return 'background-color: #ffedd5; border-color: #f97316; color: #c2410c;'; // Orange (Talabat)
+                return 'background-color: #ffedd5; border-color: #f97316; color: #c2410c;';
             } else if (catName.includes('كيتا')) {
-                return 'background-color: #e0e7ff; border-color: #6366f1; color: #3730a3;'; // Indigo/Purple (Keeta)
+                return 'background-color: #e0e7ff; border-color: #6366f1; color: #3730a3;';
             } else {
-                return 'background-color: #e0f2fe; border-color: #0284c7; color: #0369a1;'; // Blue (default)
+                return 'background-color: #e0f2fe; border-color: #0284c7; color: #0369a1;';
             }
         }
 
@@ -919,12 +919,12 @@
             for (const [catName, typesArr] of Object.entries(categories)) {
                 const cardStyle = getCategoryCardStyle(catName);
                 html += `
-                    <div class="p-3 rounded-lg border shadow-sm" style="${cardStyle}">
-                        <div class="text-xs font-bold mb-2 border-b border-opacity-30 border-current pb-1"><i class="fa-solid fa-folder-open ml-1"></i> ${catName}:</div>
-                        <div class="grid grid-cols-1 gap-2">
+                    <div class="p-2.5 rounded-lg border shadow-sm" style="${cardStyle}">
+                        <div class="text-[11px] font-bold mb-1.5 border-b border-opacity-30 border-current pb-1"><i class="fa-solid fa-folder-open ml-1"></i> ${catName}:</div>
+                        <div class="grid grid-cols-1 gap-1.5">
                 `;
                 typesArr.forEach(tName => {
-                    html += `<label class="flex items-center space-x-2 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" class="checkbox-lg"> <span>${tName}</span></label>`;
+                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" class="checkbox-lg"> <span>${tName}</span></label>`;
                 });
                 html += `</div></div>`;
             }
@@ -956,17 +956,17 @@
             activeBtn.classList.remove('bg-red-900', 'text-white');
             activeBtn.classList.add('bg-yellow-500', 'text-slate-900', 'shadow');
 
+            // إظهار كروت الإحصائيات فقط في شاشة "سجل الشكاوى"
             const statsContainer = document.getElementById('statsCardsContainer');
-            if (tabName === 'reports') {
-                statsContainer.classList.add('hidden');
-            } else {
+            if (tabName === 'list') {
                 statsContainer.classList.remove('hidden');
+            } else {
+                statsContainer.classList.add('hidden');
             }
 
             if (tabName === 'reports') renderActiveReport();
             if (tabName === 'audit') renderAuditTable();
             if (tabName === 'settings') renderSettingsUI();
-            if (window.loadFromFirebase) window.loadFromFirebase(true);
         };
 
         document.getElementById('complaintForm').onsubmit = function(e) {
@@ -1101,7 +1101,6 @@
 
         window.closeModal = function() { document.getElementById('detailsModal').classList.add('hidden'); };
 
-        // --- تعديل الشكاوى السابقة بدون كلمة مرور ---
         window.openEditComplaint = function(id) {
             const c = window.complaints.find(x => x.id === id);
             if (!c) return;
@@ -1272,7 +1271,6 @@
             renderOpsDropdown();
         };
 
-        // --- إدارة مشرفي المنطقة (بدون كلمة مرور) ---
         function renderSupervisorsManagement() {
             const container = document.getElementById('supervisorsListContainer');
             if(!container) return;
@@ -1332,7 +1330,6 @@
             alert('تم حذف المشرف بنجاح.');
         };
 
-        // --- إدارة مديري التشغيل (بدون كلمة مرور) ---
         function renderOpsManagement() {
             const container = document.getElementById('opsListContainer');
             if(!container) return;
@@ -1396,7 +1393,6 @@
             alert('تم الحذف بنجاح.');
         };
 
-        // --- إدارة أنواع وفئات الشكاوى (بدون كلمة مرور) ---
         function renderComplaintTypesManagement() {
             const container = document.getElementById('complaintTypesListContainer');
             if(!container) return;
@@ -1466,7 +1462,6 @@
             alert('تم الحذف بنجاح.');
         };
 
-        // --- إدارة الأفرع وتعديل اسم المطعم أو المشرف (بدون كلمة مرور) ---
         function renderSettingsTable() {
             const tbody = document.getElementById('settingsBranchTable');
             if(!tbody) return;
@@ -1820,7 +1815,6 @@
             container.innerHTML = html;
         }
 
-        // --- تقرير تحليل أنواع الشكاوى مع تدرج الألوان ---
         function renderReport2(container) {
             const fromDate = document.getElementById('filter_from').value;
             const toDate = document.getElementById('filter_to').value;
