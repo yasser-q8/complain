@@ -87,13 +87,13 @@
         .pdf-table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: auto; }
         .pdf-table th, .pdf-table td { 
             border: 1px solid #94a3b8; 
-            padding: 4px 3px; 
+            padding: 5px 4px; 
             text-align: center; 
             font-size: 9px; 
             vertical-align: middle; 
             line-height: 1.45;
-            white-space: normal;
-            overflow-wrap: anywhere;
+            white-space: nowrap;
+            overflow-wrap: normal;
         }
         .pdf-table th { background-color: #1e3a8a; color: white; font-weight: bold; }
         
@@ -111,7 +111,6 @@
 
         .checkbox-lg { width: 1.2rem; height: 1.2rem; accent-color: #dc2626; cursor: pointer; }
         
-        /* تنسيق صور الشكاوى المتميزة */
         .complaint-thumb {
             width: 45px;
             height: 45px;
@@ -142,19 +141,19 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-1.5 font-bold">
-                <button type="button" onclick="showTab('entry')" id="btn-entry" class="nav-btn bg-red-900 text-white rounded-lg shadow"><i class="fa-solid fa-plus-circle ml-1"></i> تسجيل شكوى</button>
-                <button type="button" onclick="showTab('reports')" id="btn-reports" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-file-invoice ml-1"></i> التقارير والـ PDF</button>
-                <button type="button" onclick="showTab('list')" id="btn-list" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-list-check ml-1"></i> سجل الشكاوى</button>
-                <button type="button" onclick="checkPasswordAndShowTab('audit')" id="btn-audit" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-shield-halved ml-1"></i> سجل الحركات</button>
-                <button type="button" onclick="showTab('settings')" id="btn-settings" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-gears ml-1"></i> الإعدادات</button>
+                <button onclick="showTab('entry')" id="btn-entry" class="nav-btn bg-red-900 text-white rounded-lg shadow"><i class="fa-solid fa-plus-circle ml-1"></i> تسجيل شكوى</button>
+                <button onclick="showTab('reports')" id="btn-reports" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-file-invoice ml-1"></i> التقارير والـ PDF</button>
+                <button onclick="showTab('list')" id="btn-list" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-list-check ml-1"></i> سجل الشكاوى</button>
+                <button onclick="checkPasswordAndShowTab('audit')" id="btn-audit" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-shield-halved ml-1"></i> سجل الحركات</button>
+                <button onclick="showTab('settings')" id="btn-settings" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-gears ml-1"></i> الإعدادات</button>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-5">
 
-        <!-- STATS CARDS (تظهر في تسجيل الشكاوى وسجل الشكاوى بدون تغيير شكلها المربع) -->
-        <div id="statsCardsContainer" class="grid grid-cols-4 gap-2 md:gap-3 mb-6 no-print">
+        <!-- STATS CARDS -->
+        <div id="statsCardsContainer" class="hidden grid grid-cols-4 gap-2 md:gap-3 mb-6 no-print">
             <div onclick="goToRecordListWithFilter('all')" class="bg-white p-2.5 rounded-xl shadow-sm border-r-4 border-red-600 stat-card-float cursor-pointer hover:bg-slate-50 transition">
                 <div class="flex justify-between items-center">
                     <div>
@@ -199,8 +198,7 @@
                 <h2 class="text-base font-bold text-slate-800 flex items-center">
                     <i class="fa-solid fa-pen-nib text-red-600 ml-2"></i> تسجيل شكوى عميل جديدة (جميع الحقول إجبارية)
                 </h2>
-                <!-- روابط تفاعلية سريعة -->
-                <div class="flex items-center gap-2 text-xs font-bold">
+                <div class="flex items-center gap-3 text-xs font-bold">
                     <button type="button" onclick="goToRecordListWithFilter('all')" class="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg border border-red-200 transition shadow-sm">
                         <i class="fa-solid fa-bullhorn ml-1"></i> إجمالي الشكاوى (<span id="quick_stat_total">0</span>)
                     </button>
@@ -210,7 +208,7 @@
                 </div>
             </div>
 
-            <form id="complaintForm" onsubmit="handleComplaintSubmit(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form id="complaintForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ الشكوى <span class="text-red-500">*</span></label>
                     <input type="date" id="c_date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
@@ -291,7 +289,7 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير وفتح التقرير PDF</button>
+                <button onclick="exportReportPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center transition"><i class="fa-solid fa-file-pdf text-lg ml-2"></i> تصدير وفتح التقرير PDF</button>
             </div>
 
             <!-- Report Rendering Box -->
@@ -314,9 +312,9 @@
                     <input type="date" id="list_from" class="border border-slate-300 rounded p-1 text-xs">
                     <span class="text-xs">إلى</span>
                     <input type="date" id="list_to" class="border border-slate-300 rounded p-1 text-xs">
-                    <button type="button" onclick="renderComplaintsList()" class="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 rounded text-xs font-bold shadow"><i class="fa-solid fa-filter ml-1"></i> إظهار الشكاوى</button>
-                    <button type="button" onclick="resetListFilter()" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded text-xs font-bold">الكل</button>
-                    <button type="button" onclick="exportComplaintsPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-3 py-1.5 rounded text-xs shadow flex items-center"><i class="fa-solid fa-file-pdf ml-1"></i> تصدير PDF</button>
+                    <button onclick="renderComplaintsList()" class="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 rounded text-xs font-bold shadow"><i class="fa-solid fa-filter ml-1"></i> إظهار الشكاوى</button>
+                    <button onclick="resetListFilter()" class="bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded text-xs font-bold">الكل</button>
+                    <button onclick="exportComplaintsPDF()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-3 py-1.5 rounded text-xs shadow flex items-center"><i class="fa-solid fa-file-pdf ml-1"></i> تصدير PDF</button>
                 </div>
             </div>
 
@@ -350,8 +348,8 @@
                 <div class="w-full md:w-72">
                     <div class="flex flex-wrap gap-2">
                         <input type="text" id="auditSearch" onkeyup="renderAuditTable()" placeholder="بحث شامل في الحركات بالحرف..." class="border border-slate-300 rounded-lg p-2 text-xs flex-1">
-                        <button type="button" onclick="deleteSelectedAuditLogs()" class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-xs font-bold">حذف الحركات المحددة</button>
-                        <button type="button" onclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover:bg-slate-300 rounded-lg px-3 py-2 text-xs font-bold">تحديد الكل</button>
+                        <button onclick="deleteSelectedAuditLogs()" class="bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-xs font-bold">حذف الحركات المحددة</button>
+                        <button onclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover:bg-slate-300 rounded-lg px-3 py-2 text-xs font-bold">تحديد الكل</button>
                     </div>
                 </div>
             </div>
@@ -384,7 +382,7 @@
                     <p class="text-xs text-slate-500">حفظ نسخة من قاعدة البيانات أو استعادتها.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="exportBackup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow"><i class="fa-solid fa-download ml-1"></i> تحميل نسخة احتياطية</button>
+                    <button onclick="exportBackup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow"><i class="fa-solid fa-download ml-1"></i> تحميل نسخة احتياطية</button>
                     <label class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow cursor-pointer">
                         <i class="fa-solid fa-upload ml-1"></i> استعادة البيانات <input type="file" id="restoreFile" onchange="importBackup(event)" class="hidden" accept=".json">
                     </label>
@@ -396,7 +394,7 @@
                 <!-- إدارة مشرفي المنطقة -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                     <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مشرفي المنطقة (تعديل / حذف / إضافة)</h3>
-                    <form id="addSuperForm" onsubmit="handleAddSuperSubmit(event)" class="flex gap-2 mb-3">
+                    <form id="addSuperForm" class="flex gap-2 mb-3">
                         <input type="text" id="new_super_name" required placeholder="اسم المشرف الجديد..." class="border border-slate-300 rounded p-2 text-xs flex-1">
                         <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold px-3 py-2 rounded text-xs"><i class="fa-solid fa-plus"></i></button>
                     </form>
@@ -406,7 +404,7 @@
                 <!-- إدارة مديري التشغيل -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                     <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مديري التشغيل (تعديل / حذف / إضافة)</h3>
-                    <form id="addOpsForm" onsubmit="handleAddOpsSubmit(event)" class="flex gap-2 mb-3">
+                    <form id="addOpsForm" class="flex gap-2 mb-3">
                         <input type="text" id="new_ops_name" required placeholder="اسم مدير التشغيل الجديد..." class="border border-slate-300 rounded p-2 text-xs flex-1">
                         <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-2 rounded text-xs"><i class="fa-solid fa-plus"></i></button>
                     </form>
@@ -415,8 +413,8 @@
 
                 <!-- إدارة أنواع وفئات الشكاوى -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة أنواع وفئات الشكاوى (إضافة / حذف)</h3>
-                    <form id="addCompTypeForm" onsubmit="handleAddCompTypeSubmit(event)" class="space-y-2 mb-3">
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة أنواع وفئات الشكاوى (تعديل / حذف / إضافة)</h3>
+                    <form id="addCompTypeForm" class="space-y-2 mb-3">
                         <input type="text" id="new_type_name" required placeholder="اسم نوع الشكوى الفرعي..." class="w-full border border-slate-300 rounded p-2 text-xs">
                         <input type="text" id="new_type_category" required list="categoriesDatalist" placeholder="اسم الفئة الرئيسية..." class="w-full border border-slate-300 rounded p-2 text-xs font-bold">
                         <datalist id="categoriesDatalist">
@@ -434,7 +432,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h3 class="text-xs font-extrabold text-slate-700 mb-3">إضافة مطعم / فرع جديد</h3>
-                    <form id="addBranchForm" onsubmit="handleAddBranchSubmit(event)" class="space-y-3">
+                    <form id="addBranchForm" class="space-y-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">اسم المطعم جديد</label>
                             <input type="text" id="new_branch_name" required class="w-full border border-slate-300 rounded p-2 text-xs">
@@ -477,11 +475,11 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
                 <h3 class="text-lg font-bold text-slate-800">تفاصيل الشكوى المسجلة</h3>
-                <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
             </div>
             <div id="modalBody" class="space-y-3 text-sm"></div>
             <div class="mt-6 flex justify-end">
-                <button type="button" onclick="closeModal()" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-bold">إغلاق</button>
+                <button onclick="closeModal()" class="bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-bold">إغلاق</button>
             </div>
         </div>
     </div>
@@ -491,7 +489,7 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
                 <h3 class="text-base font-bold text-slate-850"><i class="fa-solid fa-pen-to-square text-blue-600 ml-1"></i> تعديل بيانات الشكوى</h3>
-                <button type="button" onclick="closeEditComplaintModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
+                <button onclick="closeEditComplaintModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
             </div>
             <form id="editComplaintForm" onsubmit="saveEditedComplaint(event)" class="space-y-3 text-xs">
                 <input type="hidden" id="edit_c_id">
@@ -555,8 +553,8 @@
             <p class="text-xs text-slate-500">هذا الإجراء يتطلب إدخال كلمة المرور السرية للمتابعة:</p>
             <input type="password" id="modalPasswordInput" placeholder="أدخل كلمة المرور..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500" onkeydown="if(event.key==='Enter') submitPasswordModal()">
             <div class="flex justify-end space-x-2 space-x-reverse">
-                <button type="button" onclick="closePasswordModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded-lg text-xs">إلغاء</button>
-                <button type="button" onclick="submitPasswordModal()" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-lg text-xs">تأكيد</button>
+                <button onclick="closePasswordModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded-lg text-xs">إلغاء</button>
+                <button onclick="submitPasswordModal()" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-lg text-xs">تأكيد</button>
             </div>
         </div>
     </div>
@@ -567,10 +565,10 @@
         <div class="title">مطور البرنامج 67011143</div>
     </a>
 
-    <!-- Firebase SDK Integration & Single Initial Sync -->
+    <!-- Firebase SDK Integration & Realtime Sync -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, setDoc, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCRHrYb7iSy3d5GiHrspZv-w6ZnVmEeAKg",
@@ -601,8 +599,7 @@
             }
         };
 
-        // الجلب التلقائي مرة واحدة فقط عند فتح الموقع لمنع الشاشة السوداء وتكرار التحديث
-        window.loadFromFirebaseOnce = async function() {
+        window.loadFromFirebase = async function() {
             try {
                 const snap = await getDoc(doc(db, "naif_data", "main_store"));
                 if (snap.exists()) {
@@ -614,11 +611,9 @@
                     if (data.auditLogs) window.auditLogs = data.auditLogs;
                     if (data.supervisors) window.supervisors = data.supervisors;
                     if (data.opsManagers) window.opsManagers = data.opsManagers;
-                    if (data.complaintTypes) {
-                        window.complaintTypes = data.complaintTypes;
-                    }
+                    if (data.complaintTypes) window.complaintTypes = data.complaintTypes;
                     
-                    window.saveDataLocal(false);
+                    window.saveDataLocal();
                     window.initAppUI();
                     updateStats();
                     renderComplaintsList();
@@ -631,7 +626,50 @@
             }
         };
 
-        window.loadFromFirebaseOnce();
+        // المزامنة تتم دون عمل Refresh للصفحة
+        onSnapshot(doc(db, "naif_data", "main_store"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                let needsRefresh = false;
+                if (data.branches && JSON.stringify(data.branches) !== JSON.stringify(window.branches)) {
+                    window.branches = data.branches;
+                    needsRefresh = true;
+                }
+                if (data.complaints) {
+                    const mappedComplaints = data.complaints.map(c => ({ source: 'نايف', ...c }));
+                    if (JSON.stringify(mappedComplaints) !== JSON.stringify(window.complaints)) {
+                        window.complaints = mappedComplaints;
+                        needsRefresh = true;
+                    }
+                }
+                if (data.supervisors && JSON.stringify(data.supervisors) !== JSON.stringify(window.supervisors)) {
+                    window.supervisors = data.supervisors;
+                    needsRefresh = true;
+                }
+                if (data.opsManagers && JSON.stringify(data.opsManagers) !== JSON.stringify(window.opsManagers)) {
+                    window.opsManagers = data.opsManagers;
+                    needsRefresh = true;
+                }
+                if (data.complaintTypes && JSON.stringify(data.complaintTypes) !== JSON.stringify(window.complaintTypes)) {
+                    window.complaintTypes = data.complaintTypes;
+                    renderComplaintTypesForm();
+                    needsRefresh = true;
+                }
+
+                if (needsRefresh) {
+                    window.saveDataLocal();
+                    renderSupervisorsDropdown();
+                    renderOpsDropdown();
+                    updateStats();
+                    renderComplaintsList();
+                    renderAuditTable();
+                    renderSettingsUI();
+                    renderActiveReport();
+                }
+            }
+        });
+
+        window.loadFromFirebase();
     </script>
 
     <script>
@@ -802,13 +840,13 @@
             if (window.syncToFirebase) window.syncToFirebase();
         };
 
-        window.saveDataLocal = function(shouldSyncCloud = true) {
+        window.saveDataLocal = function() {
             localStorage.setItem('naif_branches', JSON.stringify(window.branches));
             localStorage.setItem('naif_complaints', JSON.stringify(window.complaints));
             localStorage.setItem('naif_supervisors', JSON.stringify(window.supervisors));
             localStorage.setItem('naif_ops_managers', JSON.stringify(window.opsManagers));
             localStorage.setItem('naif_comp_types', JSON.stringify(window.complaintTypes));
-            if (shouldSyncCloud && window.syncToFirebase) window.syncToFirebase();
+            if (window.syncToFirebase) window.syncToFirebase();
         };
 
         window.onload = function() {
@@ -828,6 +866,7 @@
             renderAuditTable();
             renderSettingsUI();
             renderActiveReport();
+            if (window.loadFromFirebase) window.loadFromFirebase();
         };
 
         window.initAppUI = function() {
@@ -860,7 +899,6 @@
             });
         }
 
-        // إظهار قائمة المطاعم المنسدلة فوراً بدون شاشة سوداء أو Refresh
         window.filterBranchesInput = function(query) {
             const dropdown = document.getElementById('branchDropdown');
             const q = (query || '').trim().toLowerCase();
@@ -934,13 +972,9 @@
             }
         }
 
-        // إنشاء خيارات تصنيف الشكوى بثبات تدم وللأبد دون إعادة مسح عند النقر
         function renderComplaintTypesForm() {
             const container = document.getElementById('dynamicComplaintTypesContainer');
             if(!container) return;
-            
-            // احتفاظ بالخيارات المحددة حالياً إذا كانت موجودة
-            const selectedBefore = Array.from(container.querySelectorAll('input[name="type"]:checked')).map(cb => cb.value);
             container.innerHTML = '';
 
             const categories = {};
@@ -959,8 +993,7 @@
                         <div class="grid grid-cols-1 gap-1.5">
                 `;
                 typesArr.forEach(tName => {
-                    const isChecked = selectedBefore.includes(tName) ? 'checked' : '';
-                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" ${isChecked} class="checkbox-lg"> <span>${tName}</span></label>`;
+                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" class="checkbox-lg"> <span>${tName}</span></label>`;
                 });
                 html += `</div></div>`;
             }
@@ -993,7 +1026,7 @@
             activeBtn.classList.add('bg-yellow-500', 'text-slate-900', 'shadow');
 
             const statsContainer = document.getElementById('statsCardsContainer');
-            if (tabName === 'list' || tabName === 'entry') {
+            if (tabName === 'list') {
                 statsContainer.classList.remove('hidden');
             } else {
                 statsContainer.classList.add('hidden');
@@ -1004,7 +1037,6 @@
             if (tabName === 'settings') renderSettingsUI();
         };
 
-        // الانتقال من صفحة تسجيل الشكاوى إلى سجل الشكاوى مع الفلترة المطلوبة
         window.goToRecordListWithFilter = function(mode) {
             showTab('list');
             const today = new Date();
@@ -1020,7 +1052,7 @@
             renderComplaintsList();
         };
 
-        window.handleComplaintSubmit = function(e) {
+        document.getElementById('complaintForm').onsubmit = function(e) {
             e.preventDefault();
             const phoneVal = document.getElementById('c_phone').value.trim();
             if (phoneVal.length < 8) {
@@ -1067,7 +1099,7 @@
                 
                 alert('تم حفظ الشكوى بنجاح!');
 
-                document.getElementById('complaintForm').reset();
+                this.reset();
                 const today = new Date();
                 const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
                 document.getElementById('c_date').value = todayStr;
@@ -1093,7 +1125,7 @@
             const quickTotal = document.getElementById('quick_stat_total');
             if (quickTotal) quickTotal.textContent = totalC;
 
-            const todayStr = document.getElementById('filter_date').value || (new Date().toISOString().split('T')[0]);
+            const todayStr = document.getElementById('filter_date').value;
             const todayC = window.complaints.filter(c => c.date === todayStr).length;
             document.getElementById('stat_today').textContent = todayC;
             const quickToday = document.getElementById('quick_stat_today');
@@ -1144,9 +1176,9 @@
                     <td class="p-2.5 max-w-xs truncate">${c.details || ''}</td>
                     <td class="p-2.5">${(c.types || []).map(t => `<span class="bg-red-50 text-red-700 text-xs px-1.5 py-0.5 rounded border border-red-200 ml-1">${t}</span>`).join('')}</td>
                     <td class="p-2.5 text-center space-x-2 space-x-reverse">
-                        <button type="button" onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold" title="عرض"><i class="fa-solid fa-eye"></i></button>
-                        <button type="button" onclick="openEditComplaint(${c.id})" class="text-amber-600 hover:text-amber-800 font-bold" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button type="button" onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold" title="عرض"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="openEditComplaint(${c.id})" class="text-amber-600 hover:text-amber-800 font-bold" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1380,15 +1412,15 @@
                     <div class="flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs">
                         <span class="font-bold text-slate-800">${sup}</span>
                         <div class="space-x-1 space-x-reverse">
-                            <button type="button" onclick="editSupervisor(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button type="button" onclick="removeSupervisor(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editSupervisor(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="removeSupervisor(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        window.handleAddSuperSubmit = function(e) {
+        document.getElementById('addSuperForm').onsubmit = function(e) {
             e.preventDefault();
             const name = document.getElementById('new_super_name').value.trim();
             if (window.supervisors.includes(name)) {
@@ -1439,15 +1471,15 @@
                     <div class="flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs">
                         <span class="font-bold text-slate-800">${ops}</span>
                         <div class="space-x-1 space-x-reverse">
-                            <button type="button" onclick="editOpsManager(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button type="button" onclick="removeOpsManager(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editOpsManager(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="removeOpsManager(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        window.handleAddOpsSubmit = function(e) {
+        document.getElementById('addOpsForm').onsubmit = function(e) {
             e.preventDefault();
             const name = document.getElementById('new_ops_name').value.trim();
             if (window.opsManagers.includes(name)) {
@@ -1505,15 +1537,15 @@
                             <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded mr-1">${t.category}</span>
                         </div>
                         <div class="space-x-1 space-x-reverse">
-                            <button type="button" onclick="editComplaintType(${idx})" class="text-blue-600 hover:text-blue-800 px-1 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button type="button" onclick="removeComplaintType(${idx})" class="text-red-600 hover:text-red-800 px-1 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editComplaintType(${idx})" class="text-blue-600 hover:text-blue-800 px-1 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="removeComplaintType(${idx})" class="text-red-600 hover:text-red-800 px-1 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        window.handleAddCompTypeSubmit = function(e) {
+        document.getElementById('addCompTypeForm').onsubmit = function(e) {
             e.preventDefault();
             const tName = document.getElementById('new_type_name').value.trim();
             const tCat = document.getElementById('new_type_category').value.trim();
@@ -1527,7 +1559,7 @@
             renderSettingsUI();
             window.logAction('إضافة نوع شكوى', `إضافة نوع شكوى (${tName}) تحت الفئة الرئيسية (${tCat})`);
             alert('تمت إضافة نوع الشكوى بنجاح!');
-            document.getElementById('addCompTypeForm').reset();
+            this.reset();
         };
 
         window.editComplaintType = function(idx) {
@@ -1550,7 +1582,6 @@
             alert('تم التعديل بنجاح.');
         };
 
-        // إصلاح حذف أنواع الشكاوى نهائياً وتحديث التخزين السحابي فورياً
         window.removeComplaintType = function(idx) {
             const targetType = window.complaintTypes[idx];
             if (!targetType) return;
@@ -1563,11 +1594,11 @@
             }
 
             window.complaintTypes.splice(idx, 1);
-            window.saveDataLocal(true);
+            window.saveDataLocal();
             renderComplaintTypesForm();
             renderComplaintTypesManagement();
             window.logAction('حذف نوع شكوى', `حذف نوع الشكوى (${targetType.name}) بنجاح`);
-            alert('تم حذف نوع الشكوى بنجاح وعدم عودتها.');
+            alert('تم حذف نوع الشكوى بنجاح.');
         };
 
         function renderSettingsTable() {
@@ -1582,12 +1613,12 @@
                 tr.innerHTML = `
                     <td class="p-2 font-bold flex items-center justify-between">
                         <span>${b.name}</span>
-                        <button type="button" onclick="editBranchName(${idx})" class="text-blue-600 hover:text-blue-800 text-xs px-1.5 py-0.5" title="تعديل اسم المطعم"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="editBranchName(${idx})" class="text-blue-600 hover:text-blue-800 text-xs px-1.5 py-0.5" title="تعديل اسم المطعم"><i class="fa-solid fa-pen"></i></button>
                     </td>
                     <td class="p-2"><select onchange="updateBranchManager(${idx}, this.value)" class="border rounded p-1 w-full text-xs font-bold text-blue-900">${supOptions}</select></td>
                     <td class="p-2"><select onchange="updateBranchOps(${idx}, this.value)" class="border rounded p-1 text-xs">${opsOptions}</select></td>
                     <td class="p-2 text-center">
-                        <button type="button" onclick="removeBranch(${idx})" class="bg-red-100 text-red-600 hover:bg-red-200 px-2 py-1 rounded font-bold text-xs"><i class="fa-solid fa-trash ml-1"></i> حذف</button>
+                        <button onclick="removeBranch(${idx})" class="bg-red-100 text-red-600 hover:bg-red-200 px-2 py-1 rounded font-bold text-xs"><i class="fa-solid fa-trash ml-1"></i> حذف</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1639,7 +1670,7 @@
             alert('تم حذف المطعم بنجاح.');
         };
 
-        window.handleAddBranchSubmit = function(e) {
+        document.getElementById('addBranchForm').onsubmit = function(e) {
             e.preventDefault();
             const name = document.getElementById('new_branch_name').value.trim();
             const mgr = document.getElementById('new_branch_manager').value;
@@ -1655,7 +1686,7 @@
             renderSettingsTable();
             window.logAction('إضافة فرع', `إضافة مطعم جديد (${name}) بإشراف (${mgr})`);
             alert('تمت إضافة المطعم بنجاح!');
-            document.getElementById('addBranchForm').reset();
+            this.reset();
         };
 
         window.exportBackup = function() {
@@ -1864,8 +1895,8 @@
                             <td style="font-size:8.5px; padding:2.5px 2px;">${c.manager}</td>
                             <td style="font-size:8px; padding:2.5px 2px;" class="report-num">${c.phone}</td>
                             <td style="text-align:center; padding:2px;">${imgTag}</td>
-                            <td style="text-align:right; font-size:8.5px; padding:2.5px 5px;">${c.details}</td>
-                            <td style="font-size:7.5px; padding:2.5px 2px;">${c.types.join(', ')}</td>
+                            <td style="text-align:right; font-size:8.5px; padding:2.5px 5px; white-space:normal;">${c.details}</td>
+                            <td style="font-size:7.5px; padding:2.5px 2px; white-space:normal;">${c.types.join(', ')}</td>
                         </tr>
                     `;
                 });
@@ -2066,6 +2097,7 @@
             container.innerHTML = fullHtml;
         };
 
+        // تعديل تقرير مدير التشغيل ليشمل 3 درجات لحالة المطعم
         function renderReportOps(container, opsName) {
             const opsBranches = window.branches.filter(b => b.ops === opsName);
             const branchNames = opsBranches.map(b => b.name);
@@ -2091,7 +2123,16 @@
             opsBranches.forEach(b => {
                 const cnt = opsComplaints.filter(c => c.branch === b.name).length;
                 const ratio = cnt > 0 ? '%' + ((cnt / totalC) * 100).toFixed(1) : '-';
-                const status = cnt >= 2 ? '<span style="color:red; font-weight:bold;">يحتاج متابعة</span>' : '<span style="color:green;">ممتاز</span>';
+                
+                // إضافة ثلاث درجات لحالة المطعم بناء على طلب المستخدم
+                let status = '';
+                if (cnt === 0) {
+                    status = '<span style="color:#16a34a; font-weight:bold;">ممتاز</span>';
+                } else if (cnt === 1) {
+                    status = '<span style="color:#d97706; font-weight:bold;">يحتاج متابعة</span>';
+                } else {
+                    status = '<span style="color:#dc2626; font-weight:bold;">يحتاج متابعة عاجلة</span>';
+                }
 
                 html += `
                     <tr>
@@ -2336,6 +2377,7 @@
             await savePdfFromReportElements(pages, `شركة_نايف_${titleText}.pdf`, `تصدير تقرير (${titleText}) بنجاح`);
         };
 
+        // تعديل تصدير سجل الشكاوى ليكون Landscape بمساحات واسعة ومريحة
         window.exportComplaintsPDF = async function() {
             const fromDate = document.getElementById('list_from').value;
             const toDate = document.getElementById('list_to').value;
@@ -2345,19 +2387,33 @@
             filtered.sort((a, b) => b.id - a.id);
 
             const container = document.createElement('div');
-            container.className = 'pdf-page-portrait';
-            container.style.width = '794px';
+            container.className = 'pdf-page-landscape';
+            container.style.width = '1123px';
             container.innerHTML = `
                 ${getHeaderHTML('سجل الشكاوى المسجلة بالنظام', `قائمة الشكاوى والملاحظات ${fromDate ? 'من ('+fromDate+')' : ''} ${toDate ? 'إلى ('+toDate+')' : ''}`)}
-                <table class="pdf-table" style="margin-top:10px; table-layout:fixed;">
+                <table class="pdf-table" style="margin-top:10px; table-layout:fixed; width:100%;">
                     <colgroup>
-                        <col style="width:4%"><col style="width:11%"><col style="width:10%"><col style="width:13%">
-                        <col style="width:12%"><col style="width:10%"><col style="width:10%"><col style="width:20%"><col style="width:10%">
+                        <col style="width:3%">
+                        <col style="width:8%">
+                        <col style="width:7%">
+                        <col style="width:12%">
+                        <col style="width:10%">
+                        <col style="width:9%">
+                        <col style="width:6%">
+                        <col style="width:33%">
+                        <col style="width:12%">
                     </colgroup>
                     <thead>
                         <tr>
-                            <th>م</th><th>التاريخ</th><th>المصدر</th><th>الفرع</th><th>المشرف</th>
-                            <th>الهاتف</th><th>صورة</th><th>التفاصيل</th><th>التصنيف</th>
+                            <th>م</th>
+                            <th>التاريخ</th>
+                            <th>المصدر</th>
+                            <th>الفرع</th>
+                            <th>المشرف</th>
+                            <th>الهاتف</th>
+                            <th>صورة</th>
+                            <th>التفاصيل</th>
+                            <th>التصنيف</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2366,19 +2422,19 @@
                                 <td class="report-num">${idx + 1}</td>
                                 <td>${c.date || ''}</td>
                                 <td style="font-weight:bold;">${c.source || 'نايف'}</td>
-                                <td style="font-weight:bold;">${c.branch || ''}</td>
+                                <td style="font-weight:bold; white-space:nowrap;">${c.branch || ''}</td>
                                 <td>${c.manager || ''}</td>
                                 <td class="report-num">${c.phone || ''}</td>
-                                <td style="text-align:center;">${c.image ? '<img src="'+c.image+'" style="width:28px;height:28px;object-fit:cover;border-radius:3px;">' : '-'}</td>
-                                <td style="text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:normal;">${c.details || ''}</td>
-                                <td style="white-space:normal;overflow-wrap:anywhere;">${(c.types || []).join(', ')}</td>
+                                <td style="text-align:center; padding:2px;">${c.image ? '<img src="'+c.image+'" style="width:30px;height:30px;object-fit:cover;border-radius:4px;display:inline-block;">' : '-'}</td>
+                                <td style="text-align:right; white-space:normal; overflow-wrap:anywhere; word-break:normal;">${c.details || ''}</td>
+                                <td style="white-space:normal; overflow-wrap:anywhere;">${(c.types || []).join(', ')}</td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
             `;
 
-            await savePdfFromReportElements([container], 'شركة_نايف_سجل_الشكاوى.pdf', 'تصدير سجل الشكاوى المسجلة');
+            await savePdfFromReportElements([container], 'شركة_نايف_سجل_الشكاوى.pdf', 'تصدير سجل الشكاوى المسجلة (Landscape)');
         };
     </script>
 </body>
