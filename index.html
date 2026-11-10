@@ -112,7 +112,7 @@
         .checkbox-lg { width: 1.3rem; height: 1.3rem; accent-color: #dc2626; cursor: pointer; }
     </style>
 </head>
-<body>
+<body onclick="triggerDataSync()">
 
     <!-- Header / Navbar -->
     <header class="bg-red-800 text-white shadow-lg no-print border-b-4 border-yellow-500">
@@ -121,7 +121,7 @@
                 <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" alt="شركة نايف للأغذية" class="h-12 w-12 rounded-full border-2 border-white shadow">
                 <div>
                     <h1 class="text-xl font-extrabold">شركة نايف للأغذية</h1>
-                    <p class="text-xs text-red-100">نظام إدارة وتتبع شكاوى العملاء والمزامنة السحابية</p>
+                    <p class="text-xs text-red-100">نظام إدارة وتتبع شكاوى العملاء والمزامنة السحابية الفورية</p>
                 </div>
             </div>
             <div class="flex flex-wrap gap-1.5 font-bold">
@@ -187,6 +187,14 @@
                     <input type="date" id="c_date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
                 </div>
                 <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">مصدر الشكوى <span class="text-red-500">*</span></label>
+                    <select id="c_source" required class="w-full border border-slate-300 rounded-lg p-2 text-sm font-bold bg-slate-50 text-slate-800 focus:ring-2 focus:ring-red-500">
+                        <option value="نايف">نايف</option>
+                        <option value="طلبات">طلبات</option>
+                        <option value="كيتا">كيتا</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">اسم الفرع (ابحث بالحروف) <span class="text-red-500">*</span></label>
                     <input list="branchesList" id="c_branch" required placeholder="اكتب للبحث السريع..." onchange="autoAssignDetails()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
                     <datalist id="branchesList"></datalist>
@@ -200,8 +208,8 @@
                     <input type="text" id="c_ops" readonly class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-700">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">رقم هاتف العميل <span class="text-red-500">*</span></label>
-                    <input type="text" id="c_phone" required placeholder="مثال: 90958919" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">رقم هاتف العميل (أرقام فقط - 8 خانات فأكثر) <span class="text-red-500">*</span></label>
+                    <input type="tel" id="c_phone" required placeholder="مثال: 90958919" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
                 </div>
                 <div class="md:col-span-3">
                     <label class="block text-xs font-bold text-slate-700 mb-1">تفاصيل الشكوى وملاحظات العميل <span class="text-red-500">*</span></label>
@@ -210,7 +218,7 @@
 
                 <div class="md:col-span-3 bg-slate-50 p-4 rounded-lg border border-slate-200 mt-2">
                     <label class="block text-xs font-bold text-slate-800 mb-3">تصنيف الشكوى (اختر تصنيفاً واحداً على الأقل) <span class="text-red-500">*</span></label>
-                    <div id="dynamicComplaintTypesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"></div>
+                    <div id="dynamicComplaintTypesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs"></div>
                 </div>
 
                 <div class="md:col-span-3 flex justify-end">
@@ -228,7 +236,7 @@
                         <select id="reportSelect" onchange="renderActiveReport()" class="border border-slate-300 rounded-lg p-2 text-sm font-semibold bg-slate-50 text-slate-800">
                             <option value="rep1">1. تقرير الشكاوى اليومية وتراكمي المشرفين</option>
                             <option value="rep_daily_full">2. تقرير تفاصيل الشكاوى اليومية الكامل ملحوقاً بالملخص</option>
-                            <option value="rep2">3. تقرير إجمالي أنواع الشكاوى (تمييز الأعلى والأقل)</option>
+                            <option value="rep2">3. تقرير إجمالي أنواع الشكاوى (تمييز وتدرج ألوان)</option>
                             <option value="rep3">4. التقرير اليومي الشامل لمشرفي الشهر</option>
                             <option value="rep_matrix_branches">5. تقرير مصفوفة المطاعم وأيام الشهر</option>
                             <option value="rep_ops_tb">6. تقرير مدير التشغيل: طارق بيومي</option>
@@ -285,6 +293,7 @@
                         <tr class="bg-slate-800 text-white">
                             <th class="p-2.5">م</th>
                             <th class="p-2.5">التاريخ</th>
+                            <th class="p-2.5">مصدر الشكوى</th>
                             <th class="p-2.5">الفرع</th>
                             <th class="p-2.5">مشرف المنطقة</th>
                             <th class="p-2.5">الهاتف</th>
@@ -352,7 +361,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- إدارة مشرفي المنطقة -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مشرفي المنطقة (تعديل / حذف / إضافة)</h3>
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مشرفي المنطقة (تعديل / حذف / إضافة) - بدون كلمة مرور</h3>
                     <form id="addSuperForm" class="flex gap-2 mb-3">
                         <input type="text" id="new_super_name" required placeholder="اسم المشرف الجديد..." class="border border-slate-300 rounded p-2 text-xs flex-1">
                         <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold px-3 py-2 rounded text-xs"><i class="fa-solid fa-plus"></i></button>
@@ -362,7 +371,7 @@
 
                 <!-- إدارة مديري التشغيل -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مديري التشغيل (تعديل / حذف / إضافة)</h3>
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة مديري التشغيل (تعديل / حذف / إضافة) - بدون كلمة مرور</h3>
                     <form id="addOpsForm" class="flex gap-2 mb-3">
                         <input type="text" id="new_ops_name" required placeholder="اسم مدير التشغيل الجديد..." class="border border-slate-300 rounded p-2 text-xs flex-1">
                         <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-2 rounded text-xs"><i class="fa-solid fa-plus"></i></button>
@@ -370,16 +379,19 @@
                     <div id="opsListContainer" class="max-h-48 overflow-y-auto space-y-2"></div>
                 </div>
 
-                <!-- إدارة أنواع الشكاوى وتصنيفاتها الرئيسية (شكاوى الجودة / شكاوى الخدمة) -->
+                <!-- إدارة أنواع وفئات الشكاوى (بدون كلمة مرور) -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة أنواع الشكاوى وتصنيفاتها</h3>
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-2 border-b pb-2">إدارة أنواع وفئات الشكاوى (بدون كلمة مرور)</h3>
                     <form id="addCompTypeForm" class="space-y-2 mb-3">
-                        <input type="text" id="new_type_name" required placeholder="اسم تصنيف الشكوى (مثل: محروق، تأخير)..." class="w-full border border-slate-300 rounded p-2 text-xs">
-                        <select id="new_type_category" class="w-full border border-slate-300 rounded p-2 text-xs font-bold">
-                            <option value="جودة">شكاوى الجودة</option>
-                            <option value="خدمة">شكاوى الخدمة والتوصيل</option>
-                        </select>
-                        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded text-xs"><i class="fa-solid fa-tag ml-1"></i> إضافة نوع الشكوى</button>
+                        <input type="text" id="new_type_name" required placeholder="اسم نوع الشكوى الفرعي..." class="w-full border border-slate-300 rounded p-2 text-xs">
+                        <input type="text" id="new_type_category" required list="categoriesDatalist" placeholder="اسم الفئة الرئيسية..." class="w-full border border-slate-300 rounded p-2 text-xs font-bold">
+                        <datalist id="categoriesDatalist">
+                            <option value="شكاوى الجودة">
+                            <option value="شكاوى الخدمة والتوصيل">
+                            <option value="شكاوى شركة طلبات">
+                            <option value="شكاوى شركة كيتا">
+                        </datalist>
+                        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded text-xs"><i class="fa-solid fa-tag ml-1"></i> إضافة نوع أو فئة الشكوى</button>
                     </form>
                     <div id="complaintTypesListContainer" class="max-h-40 overflow-y-auto space-y-2"></div>
                 </div>
@@ -406,7 +418,7 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">قائمة الأفرع (تعديل الاسم، المشرف، ومدير التشغيل)</h3>
+                    <h3 class="text-xs font-extrabold text-slate-700 mb-3">قائمة الأفرع (تعديل الاسم، المشرف، ومدير التشغيل - بدون كلمة مرور)</h3>
                     <div class="max-h-96 overflow-y-auto border border-slate-200 rounded-lg">
                         <table class="w-full text-xs text-right border-collapse">
                             <thead class="bg-slate-700 text-white sticky top-0">
@@ -440,10 +452,67 @@
         </div>
     </div>
 
-    <!-- Secure Password Modal -->
+    <!-- Modal for Editing Complaint (Without Password) -->
+    <div id="editComplaintModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-base font-bold text-slate-850"><i class="fa-solid fa-pen-to-square text-blue-600 ml-1"></i> تعديل بيانات الشكوى (بدون كلمة مرور)</h3>
+                <button onclick="closeEditComplaintModal()" class="text-slate-400 hover:text-red-600 text-xl font-bold">&times;</button>
+            </div>
+            <form id="editComplaintForm" onsubmit="saveEditedComplaint(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="edit_c_id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">تاريخ الشكوى</label>
+                        <input type="date" id="edit_c_date" required class="w-full border border-slate-300 rounded p-2 text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">مصدر الشكوى</label>
+                        <select id="edit_c_source" required class="w-full border border-slate-300 rounded p-2 text-xs font-bold bg-slate-50">
+                            <option value="نايف">نايف</option>
+                            <option value="طلبات">طلبات</option>
+                            <option value="كيتا">كيتا</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">رقم هاتف العميل (8 أرقام فأكثر)</label>
+                    <input type="tel" id="edit_c_phone" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-slate-300 rounded p-2 text-xs">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">المطعم / الفرع</label>
+                    <input list="branchesList" id="edit_c_branch" required onchange="autoAssignEditDetails()" class="w-full border border-slate-300 rounded p-2 text-xs">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">مشرف المنطقة</label>
+                        <input type="text" id="edit_c_manager" readonly class="w-full bg-slate-100 border border-slate-300 rounded p-2 text-xs font-bold text-blue-900">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">مدير التشغيل</label>
+                        <input type="text" id="edit_c_ops" readonly class="w-full bg-slate-100 border border-slate-300 rounded p-2 text-xs font-bold text-slate-700">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">تفاصيل الشكوى</label>
+                    <input type="text" id="edit_c_details" required class="w-full border border-slate-300 rounded p-2 text-xs">
+                </div>
+                <div class="bg-slate-50 p-3 rounded border">
+                    <label class="block font-bold text-slate-800 mb-2">تصنيفات الشكوى:</label>
+                    <div id="editComplaintTypesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                </div>
+                <div class="flex justify-end space-x-2 space-x-reverse pt-2">
+                    <button type="button" onclick="closeEditComplaintModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded text-xs">إلغاء</button>
+                    <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold px-5 py-2 rounded text-xs">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Secure Password Modal (Only for Backup/Restore & Audit logs deletion if needed) -->
     <div id="passwordModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4 no-print">
         <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
-            <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-lock text-red-600 ml-1"></i> إدخال كلمة المرور (للحذف أو التعديل)</h3>
+            <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-lock text-red-600 ml-1"></i> إدخال كلمة المرور</h3>
             <p class="text-xs text-slate-500">هذا الإجراء يتطلب إدخال كلمة المرور السرية للمتابعة:</p>
             <input type="password" id="modalPasswordInput" placeholder="أدخل كلمة المرور..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500" onkeydown="if(event.key==='Enter') submitPasswordModal()">
             <div class="flex justify-end space-x-2 space-x-reverse">
@@ -459,10 +528,10 @@
         <div class="title">مطور البرنامج 67011143</div>
     </a>
 
-    <!-- Firebase SDK Integration & Global Sync -->
+    <!-- Firebase SDK Integration & Realtime Sync -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, setDoc, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCRHrYb7iSy3d5GiHrspZv-w6ZnVmEeAKg",
@@ -493,26 +562,90 @@
             }
         };
 
-        async function loadFromFirebase() {
+        window.loadFromFirebase = async function(isSilent = false) {
             try {
                 const snap = await getDoc(doc(db, "naif_data", "main_store"));
                 if (snap.exists()) {
                     const data = snap.data();
                     if (data.branches) window.branches = data.branches;
-                    if (data.complaints) window.complaints = data.complaints;
+                    if (data.complaints) {
+                        // التأكد من وجود حقل المصدر للشكاوى القديمة
+                        window.complaints = data.complaints.map(c => ({ source: 'نايف', ...c }));
+                    }
                     if (data.auditLogs) window.auditLogs = data.auditLogs;
                     if (data.supervisors) window.supervisors = data.supervisors;
                     if (data.opsManagers) window.opsManagers = data.opsManagers;
-                    if (data.complaintTypes) window.complaintTypes = data.complaintTypes;
+                    if (data.complaintTypes) {
+                        window.complaintTypes = data.complaintTypes;
+                        // ضمان وجود فئات طلبات وكيتا الفرعية والرئيسية
+                        const requiredTypes = [
+                            { name: 'تأخير الطلب', category: 'شكاوى شركة طلبات' },
+                            { name: 'اصناف خطأ', category: 'شكاوى شركة طلبات' },
+                            { name: 'تأخير الطلب', category: 'شكاوى شركة كيتا' },
+                            { name: 'اصناف خطأ', category: 'شكاوى شركة كيتا' }
+                        ];
+                        requiredTypes.forEach(rt => {
+                            if (!window.complaintTypes.some(t => t.name === rt.name && t.category === rt.category)) {
+                                window.complaintTypes.push(rt);
+                            }
+                        });
+                    }
                     
                     window.saveDataLocal();
                     window.initAppUI();
+                    updateStats();
+                    renderComplaintsList();
+                    renderAuditTable();
+                    renderSettingsUI();
+                    renderActiveReport();
                 }
             } catch (err) {
                 console.error("Load cloud error:", err);
             }
-        }
-        loadFromFirebase();
+        };
+
+        // Realtime Listener for Instant Updates from other devices
+        onSnapshot(doc(db, "naif_data", "main_store"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                let needsRefresh = false;
+                if (data.branches && JSON.stringify(data.branches) !== JSON.stringify(window.branches)) {
+                    window.branches = data.branches;
+                    needsRefresh = true;
+                }
+                if (data.complaints) {
+                    const mappedComplaints = data.complaints.map(c => ({ source: 'نايف', ...c }));
+                    if (JSON.stringify(mappedComplaints) !== JSON.stringify(window.complaints)) {
+                        window.complaints = mappedComplaints;
+                        needsRefresh = true;
+                    }
+                }
+                if (data.supervisors && JSON.stringify(data.supervisors) !== JSON.stringify(window.supervisors)) {
+                    window.supervisors = data.supervisors;
+                    needsRefresh = true;
+                }
+                if (data.opsManagers && JSON.stringify(data.opsManagers) !== JSON.stringify(window.opsManagers)) {
+                    window.opsManagers = data.opsManagers;
+                    needsRefresh = true;
+                }
+                if (data.complaintTypes && JSON.stringify(data.complaintTypes) !== JSON.stringify(window.complaintTypes)) {
+                    window.complaintTypes = data.complaintTypes;
+                    needsRefresh = true;
+                }
+
+                if (needsRefresh) {
+                    window.saveDataLocal();
+                    window.initAppUI();
+                    updateStats();
+                    renderComplaintsList();
+                    renderAuditTable();
+                    renderSettingsUI();
+                    renderActiveReport();
+                }
+            }
+        });
+
+        window.loadFromFirebase();
     </script>
 
     <script>
@@ -595,23 +728,27 @@
         window.opsManagers = JSON.parse(localStorage.getItem('naif_ops_managers')) || ['طارق بيومي', 'هاني عبدالله'];
 
         window.complaintTypes = JSON.parse(localStorage.getItem('naif_comp_types')) || [
-            { name: 'محروق', category: 'جودة' },
-            { name: 'غير مستوي', category: 'جودة' },
-            { name: 'زفارة', category: 'جودة' },
-            { name: 'غير مطابق للمواصفات', category: 'جودة' },
-            { name: 'بارد', category: 'جودة' },
-            { name: 'مركز التحضير', category: 'جودة' },
-            { name: 'تأخير', category: 'خدمة' },
-            { name: 'سلوك', category: 'خدمة' },
-            { name: 'ناقص', category: 'خدمة' },
-            { name: 'تبديل', category: 'خدمة' },
-            { name: 'نظافة', category: 'خدمة' }
+            { name: 'محروق', category: 'شكاوى الجودة' },
+            { name: 'غير مستوي', category: 'شكاوى الجودة' },
+            { name: 'زفارة', category: 'شكاوى الجودة' },
+            { name: 'غير مطابق للمواصفات', category: 'شكاوى الجودة' },
+            { name: 'بارد', category: 'شكاوى الجودة' },
+            { name: 'مركز التحضير', category: 'شكاوى الجودة' },
+            { name: 'تأخير', category: 'شكاوى الخدمة والتوصيل' },
+            { name: 'سلوك', category: 'شكاوى الخدمة والتوصيل' },
+            { name: 'ناقص', category: 'شكاوى الخدمة والتوصيل' },
+            { name: 'تبديل', category: 'شكاوى الخدمة والتوصيل' },
+            { name: 'نظافة', category: 'شكاوى الخدمة والتوصيل' },
+            { name: 'تأخير الطلب', category: 'شكاوى شركة طلبات' },
+            { name: 'اصناف خطأ', category: 'شكاوى شركة طلبات' },
+            { name: 'تأخير الطلب', category: 'شكاوى شركة كيتا' },
+            { name: 'اصناف خطأ', category: 'شكاوى شركة كيتا' }
         ];
 
         window.branches = JSON.parse(localStorage.getItem('naif_branches')) || defaultBranches;
         window.complaints = JSON.parse(localStorage.getItem('naif_complaints')) || [
-            { id: 1, date: '2026-10-01', branch: 'الشويخ واره', manager: 'ثروت المرجاوي', ops: 'طارق بيومي', phone: '90958919', details: 'العميل يشتكي علي جوده الطلب و ناقص 3 بيبسي', types: ['غير مطابق للمواصفات', 'ناقص'] },
-            { id: 2, date: '2026-10-01', branch: 'صباح السالم', manager: 'محمد أنور', ops: 'هاني عبدالله', phone: '66637172', details: 'العميل يشتكي من عوار بالبطن', types: ['غير مطابق للمواصفات'] }
+            { id: 1, date: '2026-10-01', source: 'نايف', branch: 'الشويخ واره', manager: 'ثروت المرجاوي', ops: 'طارق بيومي', phone: '90958919', details: 'العميل يشتكي علي جوده الطلب و ناقص 3 بيبسي', types: ['غير مطابق للمواصفات', 'ناقص'] },
+            { id: 2, date: '2026-10-01', source: 'نايف', branch: 'صباح السالم', manager: 'محمد أنور', ops: 'هاني عبدالله', phone: '66637172', details: 'العميل يشتكي من عوار بالبطن', types: ['غير مطابق للمواصفات'] }
         ];
 
         window.auditLogs = JSON.parse(localStorage.getItem('naif_audit')) || [
@@ -620,6 +757,13 @@
 
         const PASS = "123321";
         let passwordCallback = null;
+
+        // دالة لتحديث البيانات فوراً عند أي ضغطة زر أو تفاعل
+        window.triggerDataSync = function() {
+            if (window.loadFromFirebase) {
+                window.loadFromFirebase(true);
+            }
+        };
 
         function getDeviceInfo() {
             const ua = navigator.userAgent;
@@ -699,6 +843,7 @@
             renderAuditTable();
             renderSettingsUI();
             renderActiveReport();
+            if (window.loadFromFirebase) window.loadFromFirebase();
         };
 
         window.initAppUI = function() {
@@ -743,33 +888,46 @@
             });
         }
 
+        // ألوان خلفيات الكروت حسب الفئة الرئيسية (مع ألوان متميزة لطلبات وكيتا)
+        function getCategoryCardStyle(catName) {
+            if (catName.includes('جودة') || catName.includes('جوده')) {
+                return 'background-color: #fef3c7; border-color: #f59e0b; color: #78350f;'; // Amber/Yellow
+            } else if (catName.includes('خدمة') || catName.includes('توصيل')) {
+                return 'background-color: #d1fae5; border-color: #10b981; color: #065f46;'; // Emerald/Green
+            } else if (catName.includes('طلبات')) {
+                return 'background-color: #ffedd5; border-color: #f97316; color: #c2410c;'; // Orange (Talabat)
+            } else if (catName.includes('كيتا')) {
+                return 'background-color: #e0e7ff; border-color: #6366f1; color: #3730a3;'; // Indigo/Purple (Keeta)
+            } else {
+                return 'background-color: #e0f2fe; border-color: #0284c7; color: #0369a1;'; // Blue (default)
+            }
+        }
+
         function renderComplaintTypesForm() {
             const container = document.getElementById('dynamicComplaintTypesContainer');
             if(!container) return;
             container.innerHTML = '';
 
-            const qualityTypes = window.complaintTypes.filter(t => t.category === 'جودة');
-            const serviceTypes = window.complaintTypes.filter(t => t.category === 'خدمة');
-
-            let html = `
-                <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
-                    <div class="text-xs font-bold text-amber-900 mb-2 border-b border-amber-300 pb-1"><i class="fa-solid fa-utensils ml-1"></i> شكاوى الجودة:</div>
-                    <div class="grid grid-cols-2 gap-2">
-            `;
-            qualityTypes.forEach(t => {
-                html += `<label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" name="type" value="${t.name}" class="checkbox-lg"> <span class="font-bold text-xs">${t.name}</span></label>`;
+            const categories = {};
+            window.complaintTypes.forEach(t => {
+                const cat = t.category || 'أخرى';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(t.name);
             });
-            html += `</div></div>`;
 
-            html += `
-                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                    <div class="text-xs font-bold text-blue-900 mb-2 border-b border-blue-300 pb-1"><i class="fa-solid fa-truck-fast ml-1"></i> شكاوى الخدمة والتوصيل:</div>
-                    <div class="grid grid-cols-2 gap-2">
-            `;
-            serviceTypes.forEach(t => {
-                html += `<label class="flex items-center space-x-2 space-x-reverse"><input type="checkbox" name="type" value="${t.name}" class="checkbox-lg"> <span class="font-bold text-xs">${t.name}</span></label>`;
-            });
-            html += `</div></div>`;
+            let html = '';
+            for (const [catName, typesArr] of Object.entries(categories)) {
+                const cardStyle = getCategoryCardStyle(catName);
+                html += `
+                    <div class="p-3 rounded-lg border shadow-sm" style="${cardStyle}">
+                        <div class="text-xs font-bold mb-2 border-b border-opacity-30 border-current pb-1"><i class="fa-solid fa-folder-open ml-1"></i> ${catName}:</div>
+                        <div class="grid grid-cols-1 gap-2">
+                `;
+                typesArr.forEach(tName => {
+                    html += `<label class="flex items-center space-x-2 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" class="checkbox-lg"> <span>${tName}</span></label>`;
+                });
+                html += `</div></div>`;
+            }
 
             container.innerHTML = html;
         }
@@ -808,10 +966,18 @@
             if (tabName === 'reports') renderActiveReport();
             if (tabName === 'audit') renderAuditTable();
             if (tabName === 'settings') renderSettingsUI();
+            if (window.loadFromFirebase) window.loadFromFirebase(true);
         };
 
         document.getElementById('complaintForm').onsubmit = function(e) {
             e.preventDefault();
+            const phoneVal = document.getElementById('c_phone').value.trim();
+            if (phoneVal.length < 8) {
+                alert('رقم موبايل العميل يجب ألا يقل عن 8 أرقام!');
+                document.getElementById('c_phone').focus();
+                return;
+            }
+
             const branchName = document.getElementById('c_branch').value.trim();
             const foundBranch = window.branches.find(b => b.name === branchName);
 
@@ -829,17 +995,18 @@
             const newC = {
                 id: Date.now(),
                 date: document.getElementById('c_date').value,
+                source: document.getElementById('c_source').value,
                 branch: foundBranch.name,
                 manager: foundBranch.manager,
                 ops: foundBranch.ops,
-                phone: document.getElementById('c_phone').value.trim(),
+                phone: phoneVal,
                 details: document.getElementById('c_details').value.trim(),
                 types: types
             };
 
             window.complaints.push(newC);
             window.saveDataLocal();
-            window.logAction('تسجيل شكوى', `تسجيل شكوى للفرع (${foundBranch.name}) بإشراف (${foundBranch.manager})`);
+            window.logAction('تسجيل شكوى', `تسجيل شكوى (مصدر: ${newC.source}) للفرع (${foundBranch.name}) بإشراف (${foundBranch.manager})`);
             updateStats();
             renderComplaintsList();
             
@@ -860,7 +1027,7 @@
             document.getElementById('stat_today').textContent = window.complaints.filter(c => c.date === todayStr).length;
 
             let q = 0, s = 0;
-            const qualityNames = window.complaintTypes.filter(t => t.category === 'جودة').map(t => t.name);
+            const qualityNames = window.complaintTypes.filter(t => t.category && t.category.includes('جودة')).map(t => t.name);
             window.complaints.forEach(c => {
                 c.types.forEach(t => {
                     if (qualityNames.includes(t)) q++;
@@ -883,25 +1050,27 @@
             if (fromDate) filtered = filtered.filter(c => c.date >= fromDate);
             if (toDate) filtered = filtered.filter(c => c.date <= toDate);
 
-            // ترتيب الشكاوى الأحدث أولاً (المسجل حديثاً يظهر فوق)
             filtered.sort((a, b) => b.id - a.id);
 
             document.getElementById('list_count').textContent = `${filtered.length} شكوى`;
 
             filtered.forEach((c, idx) => {
+                const sourceBadge = c.source === 'طلبات' ? 'bg-orange-100 text-orange-800' : (c.source === 'كيتا' ? 'bg-indigo-100 text-indigo-800' : 'bg-red-100 text-red-800');
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-100 transition';
                 tr.innerHTML = `
                     <td class="p-2.5 font-bold">${idx + 1}</td>
                     <td class="p-2.5">${c.date || ''}</td>
+                    <td class="p-2.5"><span class="${sourceBadge} text-xs px-2 py-0.5 rounded font-bold">${c.source || 'نايف'}</span></td>
                     <td class="p-2.5 font-semibold text-slate-800">${c.branch || ''}</td>
                     <td class="p-2.5 text-blue-900 font-bold">${c.manager || ''}</td>
                     <td class="p-2.5">${c.phone || ''}</td>
                     <td class="p-2.5 max-w-xs truncate">${c.details || ''}</td>
                     <td class="p-2.5">${(c.types || []).map(t => `<span class="bg-red-50 text-red-700 text-xs px-1.5 py-0.5 rounded border border-red-200 ml-1">${t}</span>`).join('')}</td>
                     <td class="p-2.5 text-center space-x-2 space-x-reverse">
-                        <button onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold" title="عرض"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="openEditComplaint(${c.id})" class="text-amber-600 hover:text-amber-800 font-bold" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -919,6 +1088,7 @@
             if (!c) return;
             document.getElementById('modalBody').innerHTML = `
                 <p><b>التاريخ:</b> ${c.date}</p>
+                <p><b>مصدر الشكوى:</b> ${c.source || 'نايف'}</p>
                 <p><b>المطعم / الفرع:</b> ${c.branch}</p>
                 <p><b>مشرف المنطقة:</b> ${c.manager}</p>
                 <p><b>مدير التشغيل:</b> ${c.ops}</p>
@@ -931,7 +1101,113 @@
 
         window.closeModal = function() { document.getElementById('detailsModal').classList.add('hidden'); };
 
-        // عند مسح شكوى مسجلة لا تطلب كلمة مرور
+        // --- تعديل الشكاوى السابقة بدون كلمة مرور ---
+        window.openEditComplaint = function(id) {
+            const c = window.complaints.find(x => x.id === id);
+            if (!c) return;
+
+            document.getElementById('edit_c_id').value = c.id;
+            document.getElementById('edit_c_date').value = c.date;
+            document.getElementById('edit_c_source').value = c.source || 'نايف';
+            document.getElementById('edit_c_phone').value = c.phone;
+            document.getElementById('edit_c_branch').value = c.branch;
+            document.getElementById('edit_c_manager').value = c.manager;
+            document.getElementById('edit_c_ops').value = c.ops;
+            document.getElementById('edit_c_details').value = c.details;
+
+            const container = document.getElementById('editComplaintTypesContainer');
+            container.innerHTML = '';
+
+            const categories = {};
+            window.complaintTypes.forEach(t => {
+                const cat = t.category || 'أخرى';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(t.name);
+            });
+
+            let html = '';
+            for (const [catName, typesArr] of Object.entries(categories)) {
+                const cardStyle = getCategoryCardStyle(catName);
+                html += `
+                    <div class="p-2.5 rounded-lg border shadow-sm" style="${cardStyle}">
+                        <div class="text-[11px] font-bold mb-1.5 border-b border-opacity-30 border-current pb-1">${catName}:</div>
+                        <div class="grid grid-cols-1 gap-1.5">
+                `;
+                typesArr.forEach(tName => {
+                    const isChecked = c.types.includes(tName) ? 'checked' : '';
+                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="edit_type" value="${tName}" ${isChecked} class="checkbox-lg" style="width:1rem;height:1rem;"> <span>${tName}</span></label>`;
+                });
+                html += `</div></div>`;
+            }
+            container.innerHTML = html;
+
+            document.getElementById('editComplaintModal').classList.remove('hidden');
+        };
+
+        window.closeEditComplaintModal = function() {
+            document.getElementById('editComplaintModal').classList.add('hidden');
+        };
+
+        window.autoAssignEditDetails = function() {
+            const val = document.getElementById('edit_c_branch').value.trim();
+            const found = window.branches.find(b => b.name === val);
+            if (found) {
+                document.getElementById('edit_c_manager').value = found.manager;
+                document.getElementById('edit_c_ops').value = found.ops;
+            } else {
+                document.getElementById('edit_c_manager').value = '';
+                document.getElementById('edit_c_ops').value = '';
+            }
+        };
+
+        window.saveEditedComplaint = function(e) {
+            e.preventDefault();
+            const id = Number(document.getElementById('edit_c_id').value);
+            const phoneVal = document.getElementById('edit_c_phone').value.trim();
+
+            if (phoneVal.length < 8) {
+                alert('رقم موبايل العميل يجب ألا يقل عن 8 أرقام!');
+                document.getElementById('edit_c_phone').focus();
+                return;
+            }
+
+            const branchName = document.getElementById('edit_c_branch').value.trim();
+            const foundBranch = window.branches.find(b => b.name === branchName);
+            if (!foundBranch) {
+                alert('يرجى اختيار مطعم معتمد صحيح!');
+                return;
+            }
+
+            const types = Array.from(document.querySelectorAll('input[name="edit_type"]:checked')).map(c => c.value);
+            if (types.length === 0) {
+                alert('يرجى اختيار تصنيف واحد على الأقل للشكوى!');
+                return;
+            }
+
+            const idx = window.complaints.findIndex(x => x.id === id);
+            if (idx !== -1) {
+                window.complaints[idx] = {
+                    id: id,
+                    date: document.getElementById('edit_c_date').value,
+                    source: document.getElementById('edit_c_source').value,
+                    branch: foundBranch.name,
+                    manager: foundBranch.manager,
+                    ops: foundBranch.ops,
+                    phone: phoneVal,
+                    details: document.getElementById('edit_c_details').value.trim(),
+                    types: types
+                };
+
+                window.saveDataLocal();
+                window.logAction('تعديل شكوى', `تعديل شكوى الفرع (${foundBranch.name}) رقم السجل (${id}) بدون كلمة مرور`);
+                updateStats();
+                renderComplaintsList();
+                renderActiveReport();
+                closeEditComplaintModal();
+                alert('تم تحديث الشكوى وحفظ التعديلات بنجاح!');
+            }
+        };
+
         window.deleteComplaint = function(id) {
             if (!confirm('هل أنت متأكد من حذف هذه الشكوى؟')) return;
             const comp = window.complaints.find(x => x.id === id);
@@ -978,15 +1254,13 @@
             if (!selected.length) { alert('حدد حركة واحدة على الأقل للحذف.'); return; }
             if (!confirm(`سيتم حذف ${selected.length} حركة. هل تريد المتابعة؟`)) return;
             
-            verifyPassword(() => {
-                const ids = new Set(selected.map(String));
-                window.auditLogs = window.auditLogs.filter(log => !ids.has(String(log.id)));
-                localStorage.setItem('naif_audit', JSON.stringify(window.auditLogs));
-                if (window.syncToFirebase) window.syncToFirebase();
-                
-                renderAuditTable();
-                alert('تم حذف الحركات المحددة بنجاح.');
-            });
+            const ids = new Set(selected.map(String));
+            window.auditLogs = window.auditLogs.filter(log => !ids.has(String(log.id)));
+            localStorage.setItem('naif_audit', JSON.stringify(window.auditLogs));
+            if (window.syncToFirebase) window.syncToFirebase();
+            
+            renderAuditTable();
+            alert('تم حذف الحركات المحددة بنجاح.');
         };
 
         window.renderSettingsUI = function() {
@@ -998,7 +1272,7 @@
             renderOpsDropdown();
         };
 
-        // --- إدارة مشرفي المنطقة ---
+        // --- إدارة مشرفي المنطقة (بدون كلمة مرور) ---
         function renderSupervisorsManagement() {
             const container = document.getElementById('supervisorsListContainer');
             if(!container) return;
@@ -1008,8 +1282,8 @@
                     <div class="flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs">
                         <span class="font-bold text-slate-800">${sup}</span>
                         <div class="space-x-1 space-x-reverse">
-                            <button onclick="editSupervisor(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="removeSupervisor(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editSupervisor(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="removeSupervisor(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -1037,30 +1311,28 @@
             if (!newName || !newName.trim() || newName.trim() === oldName) return;
             const trimmed = newName.trim();
 
-            verifyPassword(() => {
-                window.supervisors[idx] = trimmed;
-                window.branches.forEach(b => { if (b.manager === oldName) b.manager = trimmed; });
-                window.complaints.forEach(c => { if (c.manager === oldName) c.manager = trimmed; });
-                window.saveDataLocal();
-                renderSettingsUI();
-                renderComplaintsList();
-                window.logAction('تعديل مشرف', `تعديل اسم المشرف من (${oldName}) إلى (${trimmed})`);
-                alert('تم تعديل اسم المشرف بنجاح.');
-            });
+            window.supervisors[idx] = trimmed;
+            window.branches.forEach(b => { if (b.manager === oldName) b.manager = trimmed; });
+            window.complaints.forEach(c => { if (c.manager === oldName) c.manager = trimmed; });
+            window.saveDataLocal();
+            renderSettingsUI();
+            renderComplaintsList();
+            window.logAction('تعديل مشرف', `تعديل اسم المشرف من (${oldName}) إلى (${trimmed}) بدون كلمة مرور`);
+            alert('تم تعديل اسم المشرف بنجاح.');
         };
 
         window.removeSupervisor = function(idx) {
             const name = window.supervisors[idx];
-            verifyPassword(() => {
-                window.supervisors.splice(idx, 1);
-                window.saveDataLocal();
-                renderSettingsUI();
-                window.logAction('حذف مشرف', `حذف مشرف المنطقة (${name})`);
-                alert('تم حذف المشرف بنجاح.');
-            });
+            if (!confirm(`هل أنت متأكد من حذف المشرف (${name})؟`)) return;
+
+            window.supervisors.splice(idx, 1);
+            window.saveDataLocal();
+            renderSettingsUI();
+            window.logAction('حذف مشرف', `حذف مشرف المنطقة (${name}) بدون كلمة مرور`);
+            alert('تم حذف المشرف بنجاح.');
         };
 
-        // --- إدارة مديري التشغيل ---
+        // --- إدارة مديري التشغيل (بدون كلمة مرور) ---
         function renderOpsManagement() {
             const container = document.getElementById('opsListContainer');
             if(!container) return;
@@ -1070,8 +1342,8 @@
                     <div class="flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs">
                         <span class="font-bold text-slate-800">${ops}</span>
                         <div class="space-x-1 space-x-reverse">
-                            <button onclick="editOpsManager(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="removeOpsManager(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editOpsManager(${idx})" class="text-blue-600 hover:text-blue-800 px-1.5 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="removeOpsManager(${idx})" class="text-red-600 hover:text-red-800 px-1.5 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -1099,16 +1371,14 @@
             if (!newName || !newName.trim() || newName.trim() === oldName) return;
             const trimmed = newName.trim();
 
-            verifyPassword(() => {
-                window.opsManagers[idx] = trimmed;
-                window.branches.forEach(b => { if (b.ops === oldName) b.ops = trimmed; });
-                window.complaints.forEach(c => { if (c.ops === oldName) c.ops = trimmed; });
-                window.saveDataLocal();
-                renderSettingsUI();
-                renderComplaintsList();
-                window.logAction('تعديل مدير تشغيل', `تعديل اسم مدير التشغيل من (${oldName}) إلى (${trimmed})`);
-                alert('تم التعديل بنجاح.');
-            });
+            window.opsManagers[idx] = trimmed;
+            window.branches.forEach(b => { if (b.ops === oldName) b.ops = trimmed; });
+            window.complaints.forEach(c => { if (c.ops === oldName) c.ops = trimmed; });
+            window.saveDataLocal();
+            renderSettingsUI();
+            renderComplaintsList();
+            window.logAction('تعديل مدير تشغيل', `تعديل اسم مدير التشغيل من (${oldName}) إلى (${trimmed}) بدون كلمة مرور`);
+            alert('تم التعديل بنجاح.');
         };
 
         window.removeOpsManager = function(idx) {
@@ -1117,31 +1387,30 @@
                 alert('لا يمكن حذف جميع مديري التشغيل!');
                 return;
             }
-            verifyPassword(() => {
-                window.opsManagers.splice(idx, 1);
-                window.saveDataLocal();
-                renderSettingsUI();
-                window.logAction('حذف مدير تشغيل', `حذف مدير التشغيل (${name})`);
-                alert('تم الحذف بنجاح.');
-            });
+            if (!confirm(`هل أنت متأكد من حذف مدير التشغيل (${name})؟`)) return;
+
+            window.opsManagers.splice(idx, 1);
+            window.saveDataLocal();
+            renderSettingsUI();
+            window.logAction('حذف مدير تشغيل', `حذف مدير التشغيل (${name}) بدون كلمة مرور`);
+            alert('تم الحذف بنجاح.');
         };
 
-        // --- إدارة أنواع الشكاوى (شكاوى الجودة / شكاوى الخدمة) ---
+        // --- إدارة أنواع وفئات الشكاوى (بدون كلمة مرور) ---
         function renderComplaintTypesManagement() {
             const container = document.getElementById('complaintTypesListContainer');
             if(!container) return;
             container.innerHTML = '';
             window.complaintTypes.forEach((t, idx) => {
-                const catLabel = t.category === 'جودة' ? 'شكاوى الجودة' : 'شكاوى الخدمة';
                 container.innerHTML += `
                     <div class="flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs">
                         <div>
                             <span class="font-bold text-slate-800">${t.name}</span>
-                            <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded mr-1">${catLabel}</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded mr-1">${t.category}</span>
                         </div>
                         <div class="space-x-1 space-x-reverse">
-                            <button onclick="editComplaintType(${idx})" class="text-blue-600 hover:text-blue-800 px-1 py-1 font-bold"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="removeComplaintType(${idx})" class="text-red-600 hover:text-red-800 px-1 py-1 font-bold"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editComplaintType(${idx})" class="text-blue-600 hover:text-blue-800 px-1 py-1 font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="removeComplaintType(${idx})" class="text-red-600 hover:text-red-800 px-1 py-1 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -1151,55 +1420,53 @@
         document.getElementById('addCompTypeForm').onsubmit = function(e) {
             e.preventDefault();
             const tName = document.getElementById('new_type_name').value.trim();
-            const tCat = document.getElementById('new_type_category').value;
-            if (window.complaintTypes.some(t => t.name === tName)) {
-                alert('نوع الشكوى موجود بالفعل!');
+            const tCat = document.getElementById('new_type_category').value.trim();
+            if (window.complaintTypes.some(t => t.name === tName && t.category === tCat)) {
+                alert('نوع الشكوى وفئته موجودان بالفعل!');
                 return;
             }
             window.complaintTypes.push({ name: tName, category: tCat });
             window.saveDataLocal();
             renderComplaintTypesForm();
             renderSettingsUI();
-            window.logAction('إضافة نوع شكوى', `إضافة نوع شكوى (${tName}) تحت (${tCat === 'جودة' ? 'شكاوى الجودة' : 'شكاوى الخدمة'})`);
+            window.logAction('إضافة نوع شكوى', `إضافة نوع شكوى (${tName}) تحت الفئة الرئيسية (${tCat}) بدون كلمة مرور`);
             alert('تمت إضافة نوع الشكوى بنجاح!');
             this.reset();
         };
 
         window.editComplaintType = function(idx) {
             const oldObj = window.complaintTypes[idx];
-            const newName = prompt("أدخل اسم تصنيف الشكوى الجديد:", oldObj.name);
+            const newName = prompt("أدخل اسم نوع الشكوى الفرعي الجديد:", oldObj.name);
             if (!newName || !newName.trim()) return;
-            const trimmed = newName.trim();
-            const newCat = prompt("أدخل التصنيف الرئيسي (جودة أو خدمة):", oldObj.category);
-            const catTrimmed = (newCat && (newCat.trim() === 'جودة' || newCat.trim() === 'خدمة')) ? newCat.trim() : oldObj.category;
+            const trimmedName = newName.trim();
+            const newCat = prompt("أدخل اسم الفئة الرئيسية الجديدة:", oldObj.category);
+            const trimmedCat = (newCat && newCat.trim()) ? newCat.trim() : oldObj.category;
 
-            verifyPassword(() => {
-                window.complaintTypes[idx] = { name: trimmed, category: catTrimmed };
-                window.complaints.forEach(c => {
-                    c.types = c.types.map(t => t === oldObj.name ? trimmed : t);
-                });
-                window.saveDataLocal();
-                renderComplaintTypesForm();
-                renderSettingsUI();
-                renderComplaintsList();
-                window.logAction('تعديل نوع شكوى', `تعديل نوع الشكوى من (${oldObj.name}) إلى (${trimmed})`);
-                alert('تم التعديل بنجاح.');
+            window.complaintTypes[idx] = { name: trimmedName, category: trimmedCat };
+            window.complaints.forEach(c => {
+                c.types = c.types.map(t => t === oldObj.name ? trimmedName : t);
             });
+            window.saveDataLocal();
+            renderComplaintTypesForm();
+            renderSettingsUI();
+            renderComplaintsList();
+            window.logAction('تعديل نوع شكوى', `تعديل نوع الشكوى من (${oldObj.name}) إلى (${trimmedName}) بدون كلمة مرور`);
+            alert('تم التعديل بنجاح.');
         };
 
         window.removeComplaintType = function(idx) {
             const tName = window.complaintTypes[idx].name;
-            verifyPassword(() => {
-                window.complaintTypes.splice(idx, 1);
-                window.saveDataLocal();
-                renderComplaintTypesForm();
-                renderSettingsUI();
-                window.logAction('حذف نوع شكوى', `حذف نوع الشكوى (${tName})`);
-                alert('تم الحذف بنجاح.');
-            });
+            if (!confirm(`هل أنت متأكد من حذف نوع الشكوى (${tName})؟`)) return;
+            
+            window.complaintTypes.splice(idx, 1);
+            window.saveDataLocal();
+            renderComplaintTypesForm();
+            renderSettingsUI();
+            window.logAction('حذف نوع شكوى', `حذف نوع الشكوى (${tName}) بدون كلمة مرور`);
+            alert('تم الحذف بنجاح.');
         };
 
-        // --- إدارة الأفرع وتعديل اسم المطعم ---
+        // --- إدارة الأفرع وتعديل اسم المطعم أو المشرف (بدون كلمة مرور) ---
         function renderSettingsTable() {
             const tbody = document.getElementById('settingsBranchTable');
             if(!tbody) return;
@@ -1235,48 +1502,42 @@
                 return;
             }
 
-            verifyPassword(() => {
-                window.branches[idx].name = trimmed;
-                // تحديث الشكاوى المسجلة المرتبطة بهذا الفرع
-                window.complaints.forEach(c => { if (c.branch === oldName) c.branch = trimmed; });
-                window.saveDataLocal();
-                updateDatalist();
-                renderSettingsTable();
-                renderComplaintsList();
-                window.logAction('تعديل اسم مطعم', `تعديل اسم المطعم من (${oldName}) إلى (${trimmed})`);
-                alert('تم تعديل اسم المطعم بنجاح.');
-            });
+            window.branches[idx].name = trimmed;
+            window.complaints.forEach(c => { if (c.branch === oldName) c.branch = trimmed; });
+            window.saveDataLocal();
+            updateDatalist();
+            renderSettingsTable();
+            renderComplaintsList();
+            window.logAction('تعديل اسم مطعم', `تعديل اسم المطعم من (${oldName}) إلى (${trimmed}) بدون كلمة مرور`);
+            alert('تم تعديل اسم المطعم بنجاح.');
         };
 
         window.updateBranchManager = function(idx, val) {
-            verifyPassword(() => {
-                window.branches[idx].manager = val;
-                window.saveDataLocal();
-                updateDatalist();
-                window.logAction('تعديل إعدادات', `تغيير مشرف الفرع (${window.branches[idx].name}) إلى (${val})`);
-                alert('تم التحديث بنجاح.');
-            }, () => renderSettingsTable());
+            const oldMgr = window.branches[idx].manager;
+            window.branches[idx].manager = val;
+            window.saveDataLocal();
+            updateDatalist();
+            window.logAction('تعديل إعدادات', `تغيير مشرف الفرع (${window.branches[idx].name}) إلى (${val}) بدون كلمة مرور`);
+            alert('تم تحديث مشرف الفرع بنجاح.');
         };
 
         window.updateBranchOps = function(idx, val) {
-            verifyPassword(() => {
-                window.branches[idx].ops = val;
-                window.saveDataLocal();
-                window.logAction('تعديل إعدادات', `تغيير مدير تشغيل الفرع (${window.branches[idx].name}) إلى (${val})`);
-                alert('تم التحديث بنجاح.');
-            }, () => renderSettingsTable());
+            window.branches[idx].ops = val;
+            window.saveDataLocal();
+            window.logAction('تعديل إعدادات', `تغيير مدير تشغيل الفرع (${window.branches[idx].name}) إلى (${val}) بدون كلمة مرور`);
+            alert('تم تحديث مدير التشغيل بنجاح.');
         };
 
         window.removeBranch = function(idx) {
-            verifyPassword(() => {
-                const bName = window.branches[idx].name;
-                window.branches.splice(idx, 1);
-                window.saveDataLocal();
-                updateDatalist();
-                renderSettingsTable();
-                window.logAction('حذف فرع', `حذف المطعم (${bName}) من النظام`);
-                alert('تم حذف المطعم بنجاح.');
-            });
+            const bName = window.branches[idx].name;
+            if (!confirm(`هل أنت متأكد من حذف المطعم (${bName})؟`)) return;
+
+            window.branches.splice(idx, 1);
+            window.saveDataLocal();
+            updateDatalist();
+            renderSettingsTable();
+            window.logAction('حذف فرع', `حذف المطعم (${bName}) من النظام بدون كلمة مرور`);
+            alert('تم حذف المطعم بنجاح.');
         };
 
         document.getElementById('addBranchForm').onsubmit = function(e) {
@@ -1300,21 +1561,23 @@
         };
 
         window.exportBackup = function() {
-            const data = {
-                branches: window.branches,
-                complaints: window.complaints,
-                auditLogs: window.auditLogs,
-                supervisors: window.supervisors,
-                opsManagers: window.opsManagers,
-                complaintTypes: window.complaintTypes
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Naif_Backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            window.logAction('نسخ احتياطي', 'تصدير ملف النسخة الاحتياطية.');
+            verifyPassword(() => {
+                const data = {
+                    branches: window.branches,
+                    complaints: window.complaints,
+                    auditLogs: window.auditLogs,
+                    supervisors: window.supervisors,
+                    opsManagers: window.opsManagers,
+                    complaintTypes: window.complaintTypes
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Naif_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                window.logAction('نسخ احتياطي', 'تصدير ملف النسخة الاحتياطية.');
+            });
         };
 
         window.importBackup = function(event) {
@@ -1478,23 +1741,25 @@
                         <thead>
                             <tr>
                                 <th style="width:5%;">م</th>
-                                <th style="width:13%;">الفرع</th>
-                                <th style="width:15%;">المشرف</th>
+                                <th style="width:11%;">المصدر</th>
+                                <th style="width:12%;">الفرع</th>
+                                <th style="width:13%;">المشرف</th>
                                 <th style="width:11%;">الهاتف</th>
-                                <th style="width:41%;">تفاصيل الشكوى</th>
-                                <th style="width:15%;">التصنيف</th>
+                                <th style="width:38%;">تفاصيل الشكوى</th>
+                                <th style="width:10%;">التصنيف</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
 
             if (dayComplaints.length === 0) {
-                html += `<tr><td colspan="6" style="padding:6px; color:#94a3b8;">لا توجد شكاوى مسجلة في هذا اليوم</td></tr>`;
+                html += `<tr><td colspan="7" style="padding:6px; color:#94a3b8;">لا توجد شكاوى مسجلة في هذا اليوم</td></tr>`;
             } else {
                 dayComplaints.forEach((c, idx) => {
                     html += `
                         <tr>
                             <td class="report-num" style="padding:2.5px 2px;">${idx + 1}</td>
+                            <td style="font-size:8px; padding:2.5px 2px; font-weight:bold;">${c.source || 'نايف'}</td>
                             <td style="font-weight:bold; font-size:8.5px; padding:2.5px 2px;">${c.branch}</td>
                             <td style="font-size:8.5px; padding:2.5px 2px;">${c.manager}</td>
                             <td style="font-size:8px; padding:2.5px 2px;" class="report-num">${c.phone}</td>
@@ -1555,6 +1820,7 @@
             container.innerHTML = html;
         }
 
+        // --- تقرير تحليل أنواع الشكاوى مع تدرج الألوان ---
         function renderReport2(container) {
             const fromDate = document.getElementById('filter_from').value;
             const toDate = document.getElementById('filter_to').value;
@@ -1566,19 +1832,18 @@
                 c.types.forEach(t => { if (counts[t] !== undefined) counts[t]++; });
             });
 
-            const maxV = Math.max(...Object.values(counts));
-            const minV = Math.min(...Object.values(counts));
+            const maxV = Math.max(...Object.values(counts), 1);
             const total = Object.values(counts).reduce((a,b)=>a+b, 0) || 1;
 
             let html = `
                 <div class="pdf-page-portrait shadow-xl">
-                    ${getHeaderHTML('تقرير تحليل أنواع وتصنيفات الشكاوى الإجمالي', `الفترة من <b>${fromDate}</b> إلى <b>${toDate}</b>`)}
+                    ${getHeaderHTML('تقرير تحليل أنواع وتصنيفات الشكاوى الإجمالي (تدرج الألوان)', `الفترة من <b>${fromDate}</b> إلى <b>${toDate}</b>`)}
                     <table class="pdf-table">
                         <thead>
                             <tr>
                                 <th>م</th>
                                 <th>نوع الشكوى</th>
-                                <th>تصنيف الفئة</th>
+                                <th>الفئة الرئيسية</th>
                                 <th>عدد الشكاوى</th>
                                 <th>النسبة من الإجمالي</th>
                             </tr>
@@ -1588,18 +1853,24 @@
 
             window.complaintTypes.forEach((tObj, i) => {
                 const c = counts[tObj.name];
-                let bg = '';
-                if (c === maxV && maxV > 0) bg = 'background-color:#fca5a5; font-weight:bold; color:#7f1d1d;';
-                else if (c === minV) bg = 'background-color:#86efac; font-weight:bold; color:#14532d;';
+                let bgStyle = '';
+                
+                if (c === 0) {
+                    bgStyle = 'background-color:#dcfce7; color:#14532d; font-weight:bold;';
+                } else {
+                    const ratio = c / maxV;
+                    const g = Math.round(165 + (255 - 165) * (1 - ratio));
+                    const b = Math.round(165 + (255 - 165) * (1 - ratio));
+                    bgStyle = `background-color: rgb(252, ${g}, ${b}); ${ratio > 0.6 ? 'font-weight:bold; color:#7f1d1d;' : ''}`;
+                }
 
-                const catLabel = tObj.category === 'جودة' ? 'شكاوى الجودة' : 'شكاوى الخدمة والتوصيل';
                 const ratioVal = c > 0 ? '%' + ((c / total) * 100).toFixed(1) : '-';
                 html += `
-                    <tr style="${bg}">
+                    <tr style="${bgStyle}">
                         <td class="report-num">${i + 1}</td>
                         <td style="font-weight:bold; text-align:right; padding-right:15px;">${tObj.name}</td>
-                        <td>${catLabel}</td>
-                        <td class="report-num">${c === 0 ? '-' : c}</td>
+                        <td>${tObj.category}</td>
+                        <td class="report-num">${c === 0 ? '0' : c}</td>
                         <td class="report-num">${ratioVal}</td>
                     </tr>
                 `;
@@ -1980,12 +2251,12 @@
                 ${getHeaderHTML('سجل الشكاوى المسجلة بالنظام', `قائمة الشكاوى والملاحظات ${fromDate ? 'من ('+fromDate+')' : ''} ${toDate ? 'إلى ('+toDate+')' : ''}`)}
                 <table class="pdf-table" style="margin-top:10px; table-layout:fixed;">
                     <colgroup>
-                        <col style="width:5%"><col style="width:12%"><col style="width:15%">
-                        <col style="width:14%"><col style="width:12%"><col style="width:27%"><col style="width:15%">
+                        <col style="width:4%"><col style="width:11%"><col style="width:10%"><col style="width:14%">
+                        <col style="width:13%"><col style="width:11%"><col style="width:26%"><col style="width:11%">
                     </colgroup>
                     <thead>
                         <tr>
-                            <th>م</th><th>التاريخ</th><th>الفرع</th><th>المشرف</th>
+                            <th>م</th><th>التاريخ</th><th>المصدر</th><th>الفرع</th><th>المشرف</th>
                             <th>الهاتف</th><th>التفاصيل</th><th>التصنيف</th>
                         </tr>
                     </thead>
@@ -1994,6 +2265,7 @@
                             <tr>
                                 <td class="report-num">${idx + 1}</td>
                                 <td>${c.date || ''}</td>
+                                <td style="font-weight:bold;">${c.source || 'نايف'}</td>
                                 <td style="font-weight:bold;">${c.branch || ''}</td>
                                 <td>${c.manager || ''}</td>
                                 <td class="report-num">${c.phone || ''}</td>
