@@ -126,6 +126,10 @@
             border-color: #dc2626;
         }
     </style>
+<style>
+#branchDropdown > div { font-size: 115% !important; padding: .65rem .6rem !important; }
+#branchDropdown > div span { font-size: 90% !important; }
+</style>
 </head>
 <body>
 
@@ -252,7 +256,7 @@
                 </div>
 
                 <div class="md:col-span-3 flex justify-between items-center">
-                    <button type="button" onclick="manualCloudSync()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow transition"><i class="fa-solid fa-cloud-arrow-up ml-1"></i> مزامنة يدوية مع السحابة</button>
+                    <div id="cloudStatus" class="text-xs font-bold text-slate-600" role="status">جاري الاتصال بالسحابة...</div>
                     <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition"><i class="fa-solid fa-floppy-disk ml-1"></i> حفظ وتثبيت الشكوى</button>
                 </div>
             </form>
@@ -273,6 +277,7 @@
                             <option value="rep_ops_tb">6. تقرير مدير التشغيل: طارق بيومي</option>
                             <option value="rep_ops_hy">7. تقرير مدير التشغيل: هاني عبدالله</option>
                             <option value="rep4">8. تقرير الأفرع الأكثر تضرراً من الشكاوى</option>
+                            <option value="rep_supervisor_period">9. تقرير شكاوى مشرف خلال فترة</option>
                         </select>
                     </div>
                     <div>
@@ -286,6 +291,10 @@
                     <div>
                         <label class="text-xs font-bold text-slate-500 block mb-1">إلى تاريخ</label>
                         <input type="date" id="filter_to" onchange="renderActiveReport()" class="border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 block mb-1">المشرف المحدد</label>
+                        <select id="report_supervisor" onchange="renderActiveReport()" class="border border-slate-300 rounded-lg p-2 text-sm min-w-44"><option value="">كل المشرفين</option></select>
                     </div>
                 </div>
 
@@ -565,10 +574,11 @@
         <div class="title">مطور البرنامج 67011143</div>
     </a>
 
-    <!-- Firebase SDK Integration & Safe Sync (No Quota Drain) -->
+    <!-- Firebase: per-record storage, safe legacy migration, realtime sync -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, runTransaction, addDoc, deleteDoc, serverTimestamp, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCRHrYb7iSy3d5GiHrspZv-w6ZnVmEeAKg",
@@ -578,65 +588,151 @@
             messagingSenderId: "85138455433",
             appId: "1:85138455433:web:4b2ba34d2131d3a5307f58"
         };
-
-        const fbApp = initializeApp(firebaseConfig);
-        const db = getFirestore(fbApp);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
         window.db = db;
-
-        // تم إيقاف الـ onSnapshot تماماً لمنع استنزاف القراءات اليومية
-        // المزامنة الآن تتم حصراً عند الحفظ أو الضغط على زر المزامنة اليدوية
-
-        window.syncToFirebase = async function() {
-            try {
-                await setDoc(doc(db, "naif_data", "main_store"), {
-                    branches: window.branches,
-                    complaints: window.complaints,
-                    auditLogs: window.auditLogs,
-                    supervisors: window.supervisors,
-                    opsManagers: window.opsManagers,
-                    complaintTypes: window.complaintTypes,
-                    lastUpdated: new Date().toISOString()
-                });
-                console.log("تم مزامنة البيانات بنجاح مع السحابة.");
-            } catch (err) {
-                console.error("Firebase sync error:", err);
-            }
+        let stopComplaints = null, stopSettings = null, stopLogs = null;
+        let cloudReady = false;
+        const status = (msg, ok=false) => {
+            const el = document.getElementById('cloudStatus');
+            if (el) { el.textContent = msg; el.className = 'text-xs font-bold ' + (ok ? 'text-green-700' : 'text-amber-700'); }
         };
-
-        window.manualCloudSync = async function() {
-            alert("جارٍ رفع ومزامنة البيانات مع السحابة...");
-            await window.syncToFirebase();
-            alert("تمت المزامنة اليدوية بنجاح!");
+        const deviceKey = (() => {
+            let v = localStorage.getItem('naif_device_key');
+            if (!v) { v = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)); localStorage.setItem('naif_device_key', v); }
+            return v;
+        })();
+        const cleanId = v => String(v).replaceAll('/', '_');
+        const safeLocal = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) { console.warn('Local cache quota:', e); } };
+        const cacheAll = () => {
+            safeLocal('naif_branches', window.branches || []); safeLocal('naif_complaints', window.complaints || []);
+            safeLocal('naif_supervisors', window.supervisors || []); safeLocal('naif_ops_managers', window.opsManagers || []);
+            safeLocal('naif_comp_types', window.complaintTypes || []); safeLocal('naif_audit', window.auditLogs || []);
         };
+        const complaintRef = id => doc(db, 'complaints', cleanId(id));
 
-        window.loadFromFirebase = async function() {
-            try {
-                const snap = await getDoc(doc(db, "naif_data", "main_store"));
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.branches) window.branches = data.branches;
-                    if (data.complaints) {
-                        window.complaints = data.complaints.map(c => ({ source: 'نايف', ...c }));
+        // A transaction creates only missing legacy records; it never overwrites a cloud record.
+        async function createIfMissing(id, data, collectionName='complaints') {
+            const ref = doc(db, collectionName, cleanId(id));
+            return runTransaction(db, async tx => {
+                const snap = await tx.get(ref);
+                if (!snap.exists()) { tx.set(ref, { ...data, migratedAt: serverTimestamp() }); return 'created'; }
+                return 'exists';
+            });
+        }
+        async function migrateLegacyData() {
+            if (localStorage.getItem('naif_migration_v2_done') === '1') return;
+            status('جارٍ فحص البيانات القديمة وحمايتها...');
+            const legacySnap = await getDoc(doc(db, 'naif_data', 'main_store'));
+            const legacy = legacySnap.exists() ? legacySnap.data() : {};
+            const localComplaints = JSON.parse(localStorage.getItem('naif_complaints') || '[]');
+            const allLegacy = new Map();
+            [...(legacy.complaints || []), ...(localComplaints || [])].forEach(c => { if (c && c.id != null) allLegacy.set(String(c.id), c); });
+            let migrated = 0, conflicts = 0;
+            for (const [id, c] of allLegacy) {
+                const result = await createIfMissing(id, { ...c, id: c.id, source: c.source || 'نايف' });
+                if (result === 'created') migrated++;
+                else {
+                    const current = await getDoc(complaintRef(id));
+                    const remote = current.exists() ? current.data() : null;
+                    if (remote && JSON.stringify({ ...c, source: c.source || 'نايف' }) !== JSON.stringify(Object.fromEntries(Object.entries(remote).filter(([k]) => k !== 'migratedAt' && k !== 'createdAt' && k !== 'updatedAt')))) {
+                        // Preserve a differing local copy for review instead of replacing cloud data.
+                        const recoveryId = cleanId(deviceKey + '_' + id);
+                        const recoveryRef = doc(db, 'migration_recovery', recoveryId);
+                        const recoverySnap = await getDoc(recoveryRef);
+                        if (!recoverySnap.exists()) { await setDoc(recoveryRef, { originalId: c.id, complaint: c, deviceKey, recoveredAt: serverTimestamp(), reason: 'نسخة محلية تختلف عن النسخة الموجودة على السحابة؛ محفوظة للمراجعة ولا تستبدل الأصل.' }); conflicts++; }
                     }
-                    if (data.auditLogs) window.auditLogs = data.auditLogs;
-                    if (data.supervisors) window.supervisors = data.supervisors;
-                    if (data.opsManagers) window.opsManagers = data.opsManagers;
-                    if (data.complaintTypes) window.complaintTypes = data.complaintTypes;
-                    
-                    window.saveDataLocal();
-                    window.initAppUI();
-                    updateStats();
-                    renderComplaintsList();
-                    renderAuditTable();
-                    renderSettingsUI();
-                    renderActiveReport();
                 }
-            } catch (err) {
-                console.error("Load cloud error (Quota may exceed):", err);
             }
-        };
+            // First-time settings migration: legacy cloud settings win; otherwise use local cache.
+            const settingsRef = doc(db, 'settings', 'main');
+            const settingsSnap = await getDoc(settingsRef);
+            if (!settingsSnap.exists()) {
+                const settings = {
+                    branches: legacy.branches || JSON.parse(localStorage.getItem('naif_branches') || 'null') || window.branches || [],
+                    supervisors: legacy.supervisors || JSON.parse(localStorage.getItem('naif_supervisors') || 'null') || window.supervisors || [],
+                    opsManagers: legacy.opsManagers || JSON.parse(localStorage.getItem('naif_ops_managers') || 'null') || window.opsManagers || [],
+                    complaintTypes: legacy.complaintTypes || JSON.parse(localStorage.getItem('naif_comp_types') || 'null') || window.complaintTypes || []
+                };
+                await setDoc(settingsRef, settings);
+            }
+            // Preserve old audit log entries individually without replacing newer ones.
+            const oldLogs = [...(legacy.auditLogs || []), ...(JSON.parse(localStorage.getItem('naif_audit') || '[]'))];
+            for (const log of oldLogs) if (log && log.id != null) await createIfMissing(log.id, log, 'audit_logs');
+            localStorage.setItem('naif_migration_v2_done', '1');
+            status(`تم فحص الترحيل: ${migrated} شكوى جديدة، ${conflicts} نسخة محلية مختلفة محفوظة للمراجعة.`, true);
+        }
 
-        window.loadFromFirebase();
+        window.saveComplaintCloud = async function(complaint) {
+            if (!cloudReady) throw new Error('Firebase غير متصل؛ لم يتم تأكيد حفظ الشكوى على السحابة.');
+            const payload = { ...complaint, updatedAt: serverTimestamp(), updatedByDevice: deviceKey };
+            const bytes = new Blob([JSON.stringify(payload)]).size;
+            if (bytes > 850000) throw new Error('حجم بيانات الشكوى كبير جداً. قلل حجم الصورة قبل الحفظ لتجنب حد Firestore.');
+            await setDoc(complaintRef(complaint.id), payload, { merge: true });
+            return true;
+        };
+        window.deleteComplaintCloud = async function(id) {
+            if (!cloudReady) throw new Error('لا يوجد اتصال مؤكد بـ Firebase.');
+            await deleteDoc(complaintRef(id));
+        };
+        window.saveSettingsCloud = async function() {
+            if (!cloudReady) return;
+            await setDoc(doc(db, 'settings', 'main'), {
+                branches: window.branches || [], supervisors: window.supervisors || [],
+                opsManagers: window.opsManagers || [], complaintTypes: window.complaintTypes || [],
+                updatedAt: serverTimestamp(), updatedByDevice: deviceKey
+            }, { merge: true });
+        };
+        let settingsTimer = null;
+        window.queueSettingsCloudSave = function() {
+            if (settingsTimer) clearTimeout(settingsTimer);
+            settingsTimer = setTimeout(() => window.saveSettingsCloud().catch(e => { console.error(e); status('تعذر حفظ الإعدادات على السحابة'); }), 700);
+        };
+        window.writeAuditCloud = async function(log) {
+            if (!cloudReady) return;
+            await setDoc(doc(db, 'audit_logs', cleanId(log.id)), { ...log, createdAt: serverTimestamp(), deviceKey }, { merge: true });
+        };
+        window.syncToFirebase = async function() { await window.saveSettingsCloud(); };
+        window.manualCloudSync = async function() { status('المزامنة تلقائية؛ لا يلزم الضغط على زر.'); };
+
+        async function startCloud() {
+            try {
+                status('جارٍ تسجيل الاتصال الآمن...');
+                await signInAnonymously(auth);
+                await migrateLegacyData();
+                cloudReady = true;
+                const settingsRef = doc(db, 'settings', 'main');
+                stopSettings = onSnapshot(settingsRef, snap => {
+                    if (snap.exists()) {
+                        const d = snap.data();
+                        if (d.branches) window.branches = d.branches;
+                        if (d.supervisors) window.supervisors = d.supervisors;
+                        if (d.opsManagers) window.opsManagers = d.opsManagers;
+                        if (d.complaintTypes) window.complaintTypes = d.complaintTypes.map((t,i)=>({ ...t, id:t.id || 'type_'+i+'_'+btoa(unescape(encodeURIComponent(t.name+'|'+t.category))).replace(/[^a-zA-Z0-9]/g,'').slice(0,18) }));
+                        cacheAll(); if (window.initAppUI) window.initAppUI(); if (window.renderSettingsUI) window.renderSettingsUI(); if (window.renderActiveReport) window.renderActiveReport();
+                    }
+                }, err => { console.error(err); status('انقطع الاستماع لإعدادات السحابة'); });
+                stopComplaints = onSnapshot(collection(db, 'complaints'), snap => {
+                    window.complaints = snap.docs.map(d => d.data()).sort((a,b) => Number(b.id || 0)-Number(a.id || 0));
+                    safeLocal('naif_complaints', window.complaints);
+                    if (window.updateStats) window.updateStats(); if (window.renderComplaintsList) window.renderComplaintsList(); if (window.renderActiveReport) window.renderActiveReport();
+                    status(`متصل – ${window.complaints.length} شكوى مستلمة من السحابة`, true);
+                }, err => { console.error(err); status('خطأ في استقبال الشكاوى من Firebase'); });
+                stopLogs = onSnapshot(query(collection(db, 'audit_logs'), orderBy('createdAt','desc'), limit(3000)), snap => {
+                    window.auditLogs = snap.docs.map(d => d.data()); safeLocal('naif_audit', window.auditLogs);
+                    if (window.renderAuditTable) window.renderAuditTable();
+                }, err => console.warn('Audit listener:', err));
+                window.firebaseReady = true;
+            } catch (err) {
+                console.error('Firebase startup failed:', err);
+                cloudReady = false;
+                status('تعذر الاتصال بـ Firebase – لا تسجل شكاوى جديدة قبل إصلاح الاتصال.');
+                alert('تعذر الاتصال الآمن بقاعدة البيانات. لم يتم رفع البيانات. تحقق من تفعيل Anonymous Authentication وقواعد Firestore قبل الاستخدام.');
+            }
+        }
+        window.loadFromFirebase = startCloud;
+        startCloud();
     </script>
 
     <script>
@@ -736,6 +832,8 @@
             { name: 'اصناف خطأ', category: 'شكاوى شركة كيتا' }
         ];
 
+        window.complaintTypes = (window.complaintTypes || []).map((t,i)=>({ id:t.id || 'type_'+i+'_'+String(t.category||'').replace(/\W/g,'')+'_'+String(t.name||'').replace(/\W/g,''), ...t }));
+
         window.branches = JSON.parse(localStorage.getItem('naif_branches')) || defaultBranches;
         window.complaints = JSON.parse(localStorage.getItem('naif_complaints')) || [
             { id: 1, date: '2026-10-01', source: 'نايف', branch: 'الشويخ واره', manager: 'ثروت المرجاوي', ops: 'طارق بيومي', phone: '90958919', details: 'العميل يشتكي علي جوده الطلب و ناقص 3 بيبسي', types: ['غير مطابق للمواصفات', 'ناقص'], image: '' },
@@ -804,7 +902,7 @@
             window.auditLogs.unshift({ id: Date.now(), time: now, device, type, details });
             if (window.auditLogs.length > 3000) window.auditLogs.pop();
             localStorage.setItem('naif_audit', JSON.stringify(window.auditLogs));
-            if (window.syncToFirebase) window.syncToFirebase();
+            if (window.writeAuditCloud) window.writeAuditCloud(window.auditLogs[0]).catch(err => console.error('Audit save failed:', err));
         };
 
         window.saveDataLocal = function() {
@@ -813,7 +911,7 @@
             localStorage.setItem('naif_supervisors', JSON.stringify(window.supervisors));
             localStorage.setItem('naif_ops_managers', JSON.stringify(window.opsManagers));
             localStorage.setItem('naif_comp_types', JSON.stringify(window.complaintTypes));
-            if (window.syncToFirebase) window.syncToFirebase();
+            if (window.queueSettingsCloudSave) window.queueSettingsCloudSave();
         };
 
         window.onload = function() {
@@ -833,13 +931,15 @@
             renderAuditTable();
             renderSettingsUI();
             renderActiveReport();
-            if (window.loadFromFirebase) window.loadFromFirebase();
+
         };
 
         window.initAppUI = function() {
             renderComplaintTypesForm();
             renderSupervisorsDropdown();
             renderOpsDropdown();
+            const rs = document.getElementById('report_supervisor');
+            if (rs) { const old = rs.value; rs.innerHTML = '<option value="">كل المشرفين</option>' + window.supervisors.map(x=>`<option value="${x}">${x}</option>`).join(''); rs.value = old; }
         };
 
         function renderSupervisorsDropdown() {
@@ -948,7 +1048,7 @@
             window.complaintTypes.forEach(t => {
                 const cat = t.category || 'أخرى';
                 if (!categories[cat]) categories[cat] = [];
-                categories[cat].push(t.name);
+                categories[cat].push(t);
             });
 
             let html = '';
@@ -959,8 +1059,8 @@
                         <div class="text-[11px] font-bold mb-1.5 border-b border-opacity-30 border-current pb-1"><i class="fa-solid fa-folder-open ml-1"></i> ${catName}:</div>
                         <div class="grid grid-cols-1 gap-1.5">
                 `;
-                typesArr.forEach(tName => {
-                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tName}" class="checkbox-lg"> <span>${tName}</span></label>`;
+                typesArr.forEach(tObj => {
+                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="type" value="${tObj.id}" data-type-name="${tObj.name}" class="checkbox-lg"> <span>${tObj.name}</span></label>`;
                 });
                 html += `</div></div>`;
             }
@@ -1019,71 +1119,41 @@
             renderComplaintsList();
         };
 
-        document.getElementById('complaintForm').onsubmit = function(e) {
+        document.getElementById('complaintForm').onsubmit = async function(e) {
             e.preventDefault();
             const phoneVal = document.getElementById('c_phone').value.trim();
-            if (phoneVal.length < 8) {
-                alert('رقم موبايل العميل يجب ألا يقل عن 8 أرقام!');
-                document.getElementById('c_phone').focus();
-                return;
-            }
-
+            if (phoneVal.length < 8) { alert('رقم موبايل العميل يجب ألا يقل عن 8 أرقام!'); document.getElementById('c_phone').focus(); return; }
             const branchName = document.getElementById('c_branch').value.trim();
             const foundBranch = window.branches.find(b => b.name === branchName);
-
-            if (!foundBranch) {
-                alert('عذراً، يرجى اختيار مطعم معتمد وموجود بالقائمة!');
-                return;
-            }
-
-            const types = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(c => c.value);
-            if (types.length === 0) {
-                alert('يرجى اختيار تصنيف واحد على الأقل للشكوى!');
-                return;
-            }
-
+            if (!foundBranch) { alert('عذراً، يرجى اختيار مطعم معتمد وموجود بالقائمة!'); return; }
+            const selected = Array.from(document.querySelectorAll('input[name="type"]:checked'));
+            if (!selected.length) { alert('يرجى اختيار تصنيف واحد على الأقل للشكوى!'); return; }
+            const types = selected.map(x => x.dataset.typeName || x.value);
+            const typeIds = selected.map(x => x.value);
             const imageInput = document.getElementById('c_image');
-            
-            const processAndSave = (imgData) => {
-                const newC = {
-                    id: Date.now(),
-                    date: document.getElementById('c_date').value,
-                    source: document.getElementById('c_source').value,
-                    branch: foundBranch.name,
-                    manager: foundBranch.manager,
-                    ops: foundBranch.ops,
-                    phone: phoneVal,
-                    details: document.getElementById('c_details').value.trim(),
-                    types: types,
-                    image: imgData || ''
-                };
-
-                window.complaints.push(newC);
-                window.saveDataLocal();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true; submitBtn.textContent = 'جارٍ الحفظ على Firebase...';
+            try {
+                let imgData = '';
+                if (imageInput.files && imageInput.files[0]) {
+                    const file = imageInput.files[0];
+                    if (file.size > 450 * 1024) throw new Error('حجم الصورة أكبر من 450KB. يرجى تصغير الصورة قبل إرفاقها.');
+                    imgData = await new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>resolve(reader.result); reader.onerror=reject; reader.readAsDataURL(file); });
+                }
+                const newC = { id: Date.now()*1000 + Math.floor(Math.random()*1000), date: document.getElementById('c_date').value,
+                    source: document.getElementById('c_source').value, branch: foundBranch.name, manager: foundBranch.manager, ops: foundBranch.ops,
+                    phone: phoneVal, details: document.getElementById('c_details').value.trim(), types, typeIds, image: imgData,
+                    createdAtClient: new Date().toISOString() };
+                await window.saveComplaintCloud(newC);
+                window.complaints.unshift(newC); window.saveDataLocal();
                 window.logAction('تسجيل شكوى', `تسجيل شكوى (مصدر: ${newC.source}) للفرع (${foundBranch.name}) بإشراف (${foundBranch.manager})`);
-                updateStats();
-                renderComplaintsList();
-                
-                alert('تم حفظ الشكوى بنجاح محلياً ومزامنتها!');
-
-                this.reset();
-                const today = new Date();
-                const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-                document.getElementById('c_date').value = todayStr;
-                document.getElementById('c_manager').value = '';
-                document.getElementById('c_ops').value = '';
-                renderComplaintTypesForm();
-            };
-
-            if (imageInput.files && imageInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    processAndSave(e.target.result);
-                };
-                reader.readAsDataURL(imageInput.files[0]);
-            } else {
-                processAndSave('');
-            }
+                updateStats(); renderComplaintsList();
+                alert('تم تأكيد حفظ الشكوى على Firebase بنجاح.');
+                this.reset(); const today = new Date();
+                const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+                document.getElementById('c_date').value = todayStr; document.getElementById('c_manager').value=''; document.getElementById('c_ops').value=''; renderComplaintTypesForm();
+            } catch(err) { console.error(err); alert('لم يتم تأكيد حفظ الشكوى: ' + (err.message || err) + '\nلا تغلق الصفحة قبل التأكد من الاتصال.'); }
+            finally { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk ml-1"></i> حفظ وتثبيت الشكوى'; }
         };
 
         function updateStats() {
@@ -1154,7 +1224,11 @@
 
         window.viewFullImage = function(imgSrc) {
             const w = window.open("");
-            w.document.write(`<html dir="rtl"><head><title>صورة الشكوى</title></head><body style="background:#0f172a;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><img src="${imgSrc}" style="max-width:95%;max-height:95%;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5);"></body></html>`);
+            w.document.write(`<html dir="rtl"><head><title>صورة الشكوى</title><style>
+#branchDropdown > div { font-size: 115% !important; padding: .65rem .6rem !important; }
+#branchDropdown > div span { font-size: 90% !important; }
+</style>
+</head><body style="background:#0f172a;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><img src="${imgSrc}" style="max-width:95%;max-height:95%;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5);"></body></html>`);
         };
 
         window.resetListFilter = function() {
@@ -1204,7 +1278,7 @@
             window.complaintTypes.forEach(t => {
                 const cat = t.category || 'أخرى';
                 if (!categories[cat]) categories[cat] = [];
-                categories[cat].push(t.name);
+                categories[cat].push(t);
             });
 
             let html = '';
@@ -1215,9 +1289,9 @@
                         <div class="text-[11px] font-bold mb-1.5 border-b border-opacity-30 border-current pb-1">${catName}:</div>
                         <div class="grid grid-cols-1 gap-1.5">
                 `;
-                typesArr.forEach(tName => {
-                    const isChecked = c.types.includes(tName) ? 'checked' : '';
-                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="edit_type" value="${tName}" ${isChecked} class="checkbox-lg" style="width:1rem;height:1rem;"> <span>${tName}</span></label>`;
+                typesArr.forEach(tObj => {
+                    const isChecked = (c.typeIds && c.typeIds.includes(tObj.id)) || (!c.typeIds && c.types.includes(tObj.name)) ? 'checked' : '';
+                    html += `<label class="flex items-center space-x-1.5 space-x-reverse cursor-pointer font-semibold"><input type="checkbox" name="edit_type" value="${tObj.id}" data-type-name="${tObj.name}" ${isChecked} class="checkbox-lg" style="width:1rem;height:1rem;"> <span>${tObj.name}</span></label>`;
                 });
                 html += `</div></div>`;
             }
@@ -1242,74 +1316,39 @@
             }
         };
 
-        window.saveEditedComplaint = function(e) {
+        window.saveEditedComplaint = async function(e) {
             e.preventDefault();
             const id = Number(document.getElementById('edit_c_id').value);
             const phoneVal = document.getElementById('edit_c_phone').value.trim();
-
-            if (phoneVal.length < 8) {
-                alert('رقم موبايل العميل يجب ألا يقل عن 8 أرقام!');
-                document.getElementById('edit_c_phone').focus();
-                return;
-            }
-
+            if (phoneVal.length < 8) { alert('رقم موبايل العميل يجب ألا يقل عن 8 أرقام!'); return; }
             const branchName = document.getElementById('edit_c_branch').value.trim();
             const foundBranch = window.branches.find(b => b.name === branchName);
-            if (!foundBranch) {
-                alert('يرجى اختيار مطعم معتمد صحيح!');
-                return;
-            }
-
-            const types = Array.from(document.querySelectorAll('input[name="edit_type"]:checked')).map(c => c.value);
-            if (types.length === 0) {
-                alert('يرجى اختيار تصنيف واحد على الأقل للشكوى!');
-                return;
-            }
-
-            const idx = window.complaints.findIndex(x => x.id === id);
-            if (idx !== -1) {
-                const existingImage = window.complaints[idx].image || '';
-                const imageInput = document.getElementById('edit_c_image');
-
-                const finalizeEdit = (imgToSave) => {
-                    window.complaints[idx] = {
-                        id: id,
-                        date: document.getElementById('edit_c_date').value,
-                        source: document.getElementById('edit_c_source').value,
-                        branch: foundBranch.name,
-                        manager: foundBranch.manager,
-                        ops: foundBranch.ops,
-                        phone: phoneVal,
-                        details: document.getElementById('edit_c_details').value.trim(),
-                        types: types,
-                        image: imgToSave
-                    };
-
-                    window.saveDataLocal();
-                    window.logAction('تعديل شكوى', `تعديل شكوى الفرع (${foundBranch.name}) رقم السجل (${id})`);
-                    updateStats();
-                    renderComplaintsList();
-                    renderActiveReport();
-                    closeEditComplaintModal();
-                    alert('تم تحديث الشكوى وحفظ التعديلات بنجاح!');
-                };
-
+            if (!foundBranch) { alert('يرجى اختيار مطعم معتمد صحيح!'); return; }
+            const selectedTypes = Array.from(document.querySelectorAll('input[name="edit_type"]:checked'));
+            const types = selectedTypes.map(c => c.dataset.typeName || c.value); const typeIds = selectedTypes.map(c => c.value);
+            if (!types.length) { alert('يرجى اختيار تصنيف واحد على الأقل للشكوى!'); return; }
+            const idx = window.complaints.findIndex(x => Number(x.id) === id); if (idx === -1) return;
+            const old = window.complaints[idx]; const imageInput = document.getElementById('edit_c_image');
+            try {
+                let image = old.image || '';
                 if (imageInput.files && imageInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        finalizeEdit(e.target.result);
-                    };
-                    reader.readAsDataURL(imageInput.files[0]);
-                } else {
-                    finalizeEdit(existingImage);
+                    if (imageInput.files[0].size > 450*1024) throw new Error('حجم الصورة أكبر من 450KB.');
+                    image = await new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(imageInput.files[0]); });
                 }
-            }
+                const updated = { ...old, id, date:document.getElementById('edit_c_date').value, source:document.getElementById('edit_c_source').value,
+                    branch:foundBranch.name, manager:foundBranch.manager, ops:foundBranch.ops, phone:phoneVal,
+                    details:document.getElementById('edit_c_details').value.trim(), types, typeIds, image };
+                await window.saveComplaintCloud(updated); window.complaints[idx]=updated; window.saveDataLocal();
+                window.logAction('تعديل شكوى', `تعديل شكوى الفرع (${foundBranch.name}) رقم السجل (${id})`);
+                updateStats(); renderComplaintsList(); renderActiveReport(); closeEditComplaintModal(); alert('تم حفظ التعديلات على Firebase بنجاح.');
+            } catch(err) { console.error(err); alert('لم يتم تأكيد حفظ التعديل على Firebase: '+(err.message||err)); }
         };
 
-        window.deleteComplaint = function(id) {
+        window.deleteComplaint = async function(id) {
             if (!confirm('هل أنت متأكد من حذف هذه الشكوى؟')) return;
-            const comp = window.complaints.find(x => x.id === id);
-            window.complaints = window.complaints.filter(c => c.id !== id);
+            const comp = window.complaints.find(x => Number(x.id) === Number(id));
+            try { await window.deleteComplaintCloud(id); } catch(err) { alert('فشل حذف الشكوى من Firebase: '+(err.message||err)); return; }
+            window.complaints = window.complaints.filter(c => Number(c.id) !== Number(id));
             window.saveDataLocal();
             window.logAction('حذف شكوى', `تم حذف شكوى الفرع (${comp ? comp.branch : id}) من سجل الشكاوى`);
             updateStats();
@@ -1355,7 +1394,7 @@
             const ids = new Set(selected.map(String));
             window.auditLogs = window.auditLogs.filter(log => !ids.has(String(log.id)));
             localStorage.setItem('naif_audit', JSON.stringify(window.auditLogs));
-            if (window.syncToFirebase) window.syncToFirebase();
+            if (window.writeAuditCloud) window.writeAuditCloud(window.auditLogs[0]).catch(err => console.error('Audit save failed:', err));
             
             renderAuditTable();
             alert('تم حذف الحركات المحددة بنجاح.');
@@ -1537,10 +1576,7 @@
             const newCat = prompt("أدخل اسم الفئة الرئيسية الجديدة:", oldObj.category);
             const trimmedCat = (newCat && newCat.trim()) ? newCat.trim() : oldObj.category;
 
-            window.complaintTypes[idx] = { name: trimmedName, category: trimmedCat };
-            window.complaints.forEach(c => {
-                c.types = c.types.map(t => t === oldObj.name ? trimmedName : t);
-            });
+            window.complaintTypes[idx] = { ...oldObj, name: trimmedName, category: trimmedCat };
             window.saveDataLocal();
             renderComplaintTypesForm();
             renderSettingsUI();
@@ -1656,8 +1692,7 @@
             this.reset();
         };
 
-        window.exportBackup = function() {
-            verifyPassword(() => {
+        window.exportBackup = async function() {
                 const data = {
                     branches: window.branches,
                     complaints: window.complaints,
@@ -1672,8 +1707,8 @@
                 a.href = url;
                 a.download = `Naif_Backup_${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
                 window.logAction('نسخ احتياطي', 'تصدير ملف النسخة الاحتياطية.');
-            });
         };
 
         window.importBackup = function(event) {
@@ -1681,17 +1716,21 @@
                 const file = event.target.files[0];
                 if (!file) return;
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     try {
                         const parsed = JSON.parse(e.target.result);
                         if (parsed.branches && parsed.complaints) {
                             window.branches = parsed.branches;
-                            window.complaints = parsed.complaints;
-                            if (parsed.auditLogs) window.auditLogs = parsed.auditLogs;
+                            const currentById = new Map((window.complaints || []).map(c => [String(c.id), c]));
+                            const backupOnlyComplaints = [];
+                            for (const c of (parsed.complaints || [])) if (c && c.id != null && !currentById.has(String(c.id))) { currentById.set(String(c.id), c); backupOnlyComplaints.push(c); }
+                            window.complaints = Array.from(currentById.values());
+                            if (parsed.auditLogs) window.auditLogs = [...(window.auditLogs || []), ...parsed.auditLogs.filter(x => !(window.auditLogs || []).some(y => String(y.id) === String(x.id)))];
                             if (parsed.supervisors) window.supervisors = parsed.supervisors;
                             if (parsed.opsManagers) window.opsManagers = parsed.opsManagers;
                             if (parsed.complaintTypes) window.complaintTypes = parsed.complaintTypes;
                             window.saveDataLocal();
+                            for (const c of backupOnlyComplaints) { try { await window.saveComplaintCloud(c); } catch (err) { console.warn('Backup complaint upload skipped:', c.id, err); } }
                             window.initAppUI();
                             renderComplaintsList();
                             updateStats();
@@ -1721,6 +1760,7 @@
             else if (repType === 'rep_ops_tb') renderReportOps(container, 'طارق بيومي');
             else if (repType === 'rep_ops_hy') renderReportOps(container, 'هاني عبدالله');
             else if (repType === 'rep4') renderReport4(container);
+            else if (repType === 'rep_supervisor_period') renderSupervisorPeriodReport(container);
         };
 
         function getHeaderHTML(title, sub) {
@@ -1922,14 +1962,12 @@
         function renderReport2(container) {
             const fromDate = document.getElementById('filter_from').value;
             const toDate = document.getElementById('filter_to').value;
-            const allTypeNames = window.complaintTypes.map(t => t.name);
             const counts = {};
-            allTypeNames.forEach(t => counts[t] = 0);
-
+            window.complaintTypes.forEach(t => counts[t.id] = 0);
             window.complaints.filter(c => c.date >= fromDate && c.date <= toDate).forEach(c => {
-                c.types.forEach(t => { if (counts[t] !== undefined) counts[t]++; });
+                if (Array.isArray(c.typeIds) && c.typeIds.length) c.typeIds.forEach(id => { if (counts[id] !== undefined) counts[id]++; });
+                else (c.types || []).forEach(name => window.complaintTypes.filter(t => t.name === name).forEach(t => counts[t.id]++));
             });
-
             const maxV = Math.max(...Object.values(counts), 1);
             const total = Object.values(counts).reduce((a,b)=>a+b, 0) || 1;
 
@@ -1950,7 +1988,7 @@
             `;
 
             window.complaintTypes.forEach((tObj, i) => {
-                const c = counts[tObj.name];
+                const c = counts[tObj.id] || 0;
                 let bgStyle = '';
                 
                 if (c === 0) {
@@ -2122,6 +2160,23 @@
                 </div>
             `;
             container.innerHTML = html;
+        }
+
+        function renderSupervisorPeriodReport(container) {
+            const manager = document.getElementById('report_supervisor')?.value || '';
+            const from = document.getElementById('filter_from').value || '0000-01-01';
+            const to = document.getElementById('filter_to').value || '9999-12-31';
+            const rows = window.complaints.filter(c => (!manager || c.manager === manager) && c.date >= from && c.date <= to).sort((a,b)=>a.date.localeCompare(b.date));
+            const byBranch = {}; const byType = {};
+            rows.forEach(c => { byBranch[c.branch]=(byBranch[c.branch]||0)+1; (c.types||[]).forEach(t=>byType[t]=(byType[t]||0)+1); });
+            let html = `<div class="pdf-page-landscape shadow-xl">${getHeaderHTML('تقرير شكاوى مشرف خلال فترة محددة', `المشرف: <b>${manager || 'كل المشرفين'}</b> | من <b>${from}</b> إلى <b>${to}</b> | إجمالي الشكاوى: <b>${rows.length}</b>`)}
+                <h3 style="font-weight:bold;margin:8px 0;">ملخص حسب الفرع</h3><table class="pdf-table"><thead><tr><th>الفرع</th><th>عدد الشكاوى</th></tr></thead><tbody>`;
+            Object.entries(byBranch).sort((a,b)=>b[1]-a[1]).forEach(([b,n])=>html+=`<tr><td>${b}</td><td class="report-num">${n}</td></tr>`);
+            html += `</tbody></table><h3 style="font-weight:bold;margin:8px 0;">ملخص حسب نوع الشكوى</h3><table class="pdf-table"><thead><tr><th>النوع</th><th>العدد</th></tr></thead><tbody>`;
+            Object.entries(byType).sort((a,b)=>b[1]-a[1]).forEach(([t,n])=>html+=`<tr><td>${t}</td><td class="report-num">${n}</td></tr>`);
+            html += `</tbody></table><h3 style="font-weight:bold;margin:8px 0;">تفاصيل الشكاوى</h3><table class="pdf-table"><thead><tr><th>التاريخ</th><th>الفرع</th><th>المشرف</th><th>المصدر</th><th>الهاتف</th><th>التفاصيل</th><th>التصنيف</th></tr></thead><tbody>`;
+            rows.forEach(c=>html+=`<tr><td>${c.date||''}</td><td>${c.branch||''}</td><td>${c.manager||''}</td><td>${c.source||''}</td><td>${c.phone||''}</td><td>${c.details||''}</td><td>${(c.types||[]).join('، ')}</td></tr>`);
+            html += `</tbody></table></div>`; container.innerHTML=html;
         }
 
         function renderReport4(container) {
