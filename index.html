@@ -133,6 +133,34 @@
 </head>
 <body>
 
+    <!-- Login Overlay Screen -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border-t-8 border-red-800 text-center space-y-6">
+            <div class="flex justify-center">
+                <img src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" alt="شركة نايف للأغذية" class="h-20 w-20 rounded-full border-4 border-red-800 shadow-md">
+            </div>
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">شركة نايف للأغذية</h1>
+                <p class="text-xs text-slate-500 mt-1">نظام إدارة وتتبع شكاوى العملاء</p>
+            </div>
+            
+            <div class="space-y-4 text-right">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">أدخل كلمة المرور للدخول:</label>
+                    <input type="password" id="loginPasswordInput" placeholder="أدخل كلمة المرور..." class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-600 focus:outline-none" onkeydown="if(event.key==='Enter') handleLogin()">
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-center justify-between">
+                    <span>كلمة مرور المستوى الثاني:</span>
+                    <span class="font-mono font-bold bg-white px-2 py-1 rounded border border-amber-300 text-red-700 text-sm">123</span>
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 text-sm flex items-center justify-center">
+                    <i class="fa-solid fa-right-to-bracket ml-2"></i> تسجـيل الدخـول
+                </button>
+            </div>
+            <div class="text-[11px] text-slate-400">جميع الحقوق محفوظة © شركة نايف للأغذية</div>
+        </div>
+    </div>
+
     <!-- Header / Navbar -->
     <header class="bg-red-800 text-white shadow-lg no-print border-b-4 border-yellow-500">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
@@ -143,12 +171,13 @@
                     <p class="text-xs text-red-100">نظام إدارة وتتبع شكاوى العملاء (وضع الحفظ الاقتصادي)</p>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-1.5 font-bold">
+            <div class="flex flex-wrap gap-1.5 font-bold items-center">
                 <button onclick="showTab('entry')" id="btn-entry" class="nav-btn bg-red-900 text-white rounded-lg shadow"><i class="fa-solid fa-plus-circle ml-1"></i> تسجيل شكوى</button>
                 <button onclick="showTab('reports')" id="btn-reports" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-file-invoice ml-1"></i> التقارير والـ PDF</button>
                 <button onclick="showTab('list')" id="btn-list" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-list-check ml-1"></i> سجل الشكاوى</button>
                 <button onclick="checkPasswordAndShowTab('audit')" id="btn-audit" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-shield-halved ml-1"></i> سجل الحركات</button>
                 <button onclick="showTab('settings')" id="btn-settings" class="nav-btn bg-red-900 text-white rounded-lg"><i class="fa-solid fa-gears ml-1"></i> الإعدادات</button>
+                <button onclick="logoutSystem()" class="nav-btn bg-slate-900 hover:bg-black text-white rounded-lg ml-2"><i class="fa-solid fa-right-from-bracket ml-1"></i> خروج</button>
             </div>
         </div>
     </header>
@@ -826,10 +855,10 @@
             { name: 'ناقص', category: 'شكاوى الخدمة والتوصيل' },
             { name: 'تبديل', category: 'شكاوى الخدمة والتوصيل' },
             { name: 'نظافة', category: 'شكاوى الخدمة والتوصيل' },
-            { name: 'تأخير الطلب', category: 'شكاوى شركة طلبات' },
-            { name: 'اصناف خطأ', category: 'شكاوى شركة طلبات' },
-            { name: 'تأخير الطلب', category: 'شكاوى شركة كيتا' },
-            { name: 'اصناف خطأ', category: 'شكاوى شركة كيتا' }
+            { name: 'تأخير الطلب -T', category: 'شكاوى شركة طلبات' },
+            { name: 'اصناف خطأ-T', category: 'شكاوى شركة طلبات' },
+            { name: 'تأخير الطلب-K', category: 'شكاوى شركة كيتا' },
+            { name: 'اصناف خطأ-K', category: 'شكاوى شركة كيتا' }
         ];
 
         window.complaintTypes = (window.complaintTypes || []).map((t,i)=>({ id:t.id || 'type_'+i+'_'+String(t.category||'').replace(/\W/g,'')+'_'+String(t.name||'').replace(/\W/g,''), ...t }));
@@ -844,8 +873,65 @@
             { id: 1, time: '2026-10-01 08:00:00', device: 'كمبيوتر مكتبي / لابتوب - Google Chrome (Win32)', type: 'بدء النظام', details: 'تم تهيئة النظام ومزامنة السحابة بنجاح.' }
         ];
 
-        const PASS = "123";
+        let currentUserLevel = null;
+        const PASS_LEVEL_1 = "885522";
+        const PASS_LEVEL_2 = "123";
+        const PASS = "123321";
         let passwordCallback = null;
+
+        function handleLogin() {
+            const pw = document.getElementById('loginPasswordInput').value.trim();
+            if (pw === PASS_LEVEL_1) {
+                currentUserLevel = 1;
+                document.getElementById('loginScreen').classList.add('hidden');
+                initSystemAfterLogin();
+            } else if (pw === PASS_LEVEL_2) {
+                currentUserLevel = 2;
+                document.getElementById('loginScreen').classList.add('hidden');
+                initSystemAfterLogin();
+            } else {
+                alert("كلمة المرور غير صحيحة!");
+                document.getElementById('loginPasswordInput').value = '';
+                document.getElementById('loginPasswordInput').focus();
+            }
+        }
+
+        function logoutSystem() {
+            currentUserLevel = null;
+            document.getElementById('loginPasswordInput').value = '';
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        function initSystemAfterLogin() {
+            window.initAppUI();
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            const monthStart = todayStr.slice(0, 8) + '01';
+            document.getElementById('c_date').value = todayStr;
+            document.getElementById('filter_date').value = todayStr;
+            document.getElementById('filter_from').value = monthStart;
+            document.getElementById('filter_to').value = todayStr;
+            document.getElementById('list_from').value = monthStart;
+            document.getElementById('list_to').value = todayStr;
+
+            updateStats();
+            renderComplaintsList();
+            renderAuditTable();
+            renderSettingsUI();
+            renderActiveReport();
+
+            if (currentUserLevel === 2) {
+                const auditBtn = document.getElementById('btn-audit');
+                if (auditBtn) auditBtn.style.display = 'none';
+                const settingsBtn = document.getElementById('btn-settings');
+                if (settingsBtn) settingsBtn.style.display = 'none';
+            } else {
+                const auditBtn = document.getElementById('btn-audit');
+                if (auditBtn) auditBtn.style.display = 'inline-block';
+                const settingsBtn = document.getElementById('btn-settings');
+                if (settingsBtn) settingsBtn.style.display = 'inline-block';
+            }
+        }
 
         function getDeviceInfo() {
             const ua = navigator.userAgent;
@@ -866,6 +952,10 @@
         }
 
         window.verifyPassword = function(callback) {
+            if (currentUserLevel === 2) {
+                alert("عذراً، هذا الإجراء غير متاح لمستوى الصلاحية الحالي.");
+                return;
+            }
             passwordCallback = callback;
             document.getElementById('modalPasswordInput').value = '';
             document.getElementById('passwordModal').classList.remove('hidden');
@@ -891,6 +981,10 @@
         };
 
         window.checkPasswordAndShowTab = function(tabName) {
+            if (currentUserLevel === 2) {
+                alert("عذراً، صفحة سجل الحركات غير متاحة لمستوى الصلاحية الحالي.");
+                return;
+            }
             verifyPassword(() => {
                 showTab(tabName);
             });
@@ -915,23 +1009,7 @@
         };
 
         window.onload = function() {
-            window.initAppUI();
-            const today = new Date();
-            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-            const monthStart = todayStr.slice(0, 8) + '01';
-            document.getElementById('c_date').value = todayStr;
-            document.getElementById('filter_date').value = todayStr;
-            document.getElementById('filter_from').value = monthStart;
-            document.getElementById('filter_to').value = todayStr;
-            document.getElementById('list_from').value = monthStart;
-            document.getElementById('list_to').value = todayStr;
-
-            updateStats();
-            renderComplaintsList();
-            renderAuditTable();
-            renderSettingsUI();
-            renderActiveReport();
-
+            document.getElementById('loginPasswordInput').focus();
         };
 
         window.initAppUI = function() {
@@ -1081,16 +1159,28 @@
         };
 
         window.showTab = function(tabName) {
+            if (currentUserLevel === 2) {
+                if (tabName === 'audit' || tabName === 'settings') {
+                    alert("عذراً، هذه الصفحة غير متاحة لمستوى الصلاحية الحالي.");
+                    return;
+                }
+            }
             ['entry', 'reports', 'list', 'audit', 'settings'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const tabEl = document.getElementById(`tab-${t}`);
+                if (tabEl) tabEl.classList.add('hidden');
                 const btn = document.getElementById(`btn-${t}`);
-                btn.classList.remove('bg-yellow-500', 'text-slate-900', 'shadow');
-                btn.classList.add('bg-red-900', 'text-white');
+                if (btn) {
+                    btn.classList.remove('bg-yellow-500', 'text-slate-900', 'shadow');
+                    btn.classList.add('bg-red-900', 'text-white');
+                }
             });
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            if (targetTab) targetTab.classList.remove('hidden');
             const activeBtn = document.getElementById(`btn-${tabName}`);
-            activeBtn.classList.remove('bg-red-900', 'text-white');
-            activeBtn.classList.add('bg-yellow-500', 'text-slate-900', 'shadow');
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-red-900', 'text-white');
+                activeBtn.classList.add('bg-yellow-500', 'text-slate-900', 'shadow');
+            }
 
             const statsContainer = document.getElementById('statsCardsContainer');
             if (tabName === 'list') {
@@ -1200,6 +1290,14 @@
                 const sourceBadge = c.source === 'طلبات' ? 'bg-orange-100 text-orange-800' : (c.source === 'كيتا' ? 'bg-indigo-100 text-indigo-800' : 'bg-red-100 text-red-800');
                 const imageCell = c.image ? `<img src="${c.image}" class="complaint-thumb" alt="صورة الشكوى" onclick="viewFullImage('${c.image}')">` : '<span class="text-slate-400 text-[10px]">بدون صورة</span>';
                 
+                let actionsHtml = `<button onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold" title="عرض"><i class="fa-solid fa-eye"></i></button>`;
+                if (currentUserLevel === 1) {
+                    actionsHtml += `
+                        <button onclick="openEditComplaint(${c.id})" class="text-amber-600 hover:text-amber-800 font-bold" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                }
+
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-100 transition';
                 tr.innerHTML = `
@@ -1212,11 +1310,7 @@
                     <td class="p-2.5 text-center">${imageCell}</td>
                     <td class="p-2.5 max-w-xs truncate">${c.details || ''}</td>
                     <td class="p-2.5">${(c.types || []).map(t => `<span class="bg-red-50 text-red-700 text-xs px-1.5 py-0.5 rounded border border-red-200 ml-1">${t}</span>`).join('')}</td>
-                    <td class="p-2.5 text-center space-x-2 space-x-reverse">
-                        <button onclick="viewDetails(${c.id})" class="text-blue-600 hover:text-blue-800 font-bold" title="عرض"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="openEditComplaint(${c.id})" class="text-amber-600 hover:text-amber-800 font-bold" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteComplaint(${c.id})" class="text-red-600 hover:text-red-800 font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                    <td class="p-2.5 text-center space-x-2 space-x-reverse">${actionsHtml}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1258,6 +1352,10 @@
         window.closeModal = function() { document.getElementById('detailsModal').classList.add('hidden'); };
 
         window.openEditComplaint = function(id) {
+            if (currentUserLevel === 2) {
+                alert("عذراً، لا يمكنك تعديل الشكاوى بحسب الصلاحيات الممنوحة.");
+                return;
+            }
             const c = window.complaints.find(x => x.id === id);
             if (!c) return;
 
@@ -1318,6 +1416,10 @@
 
         window.saveEditedComplaint = async function(e) {
             e.preventDefault();
+            if (currentUserLevel === 2) {
+                alert("عذراً، لا يمكنك حفظ التعديلات بحسب الصلاحيات الممنوحة.");
+                return;
+            }
             const id = Number(document.getElementById('edit_c_id').value);
             const phoneVal = document.getElementById('edit_c_phone').value.trim();
             if (phoneVal.length < 8) { alert('رقم موبايل العميل يجب ألا يقل عن 8 أرقام!'); return; }
@@ -1345,6 +1447,10 @@
         };
 
         window.deleteComplaint = async function(id) {
+            if (currentUserLevel === 2) {
+                alert("عذراً، لا يمكنك حذف الشكاوى بحسب الصلاحيات الممنوحة.");
+                return;
+            }
             if (!confirm('هل أنت متأكد من حذف هذه الشكوى؟')) return;
             const comp = window.complaints.find(x => Number(x.id) === Number(id));
             try { await window.deleteComplaintCloud(id); } catch(err) { alert('فشل حذف الشكوى من Firebase: '+(err.message||err)); return; }
