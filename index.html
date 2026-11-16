@@ -953,7 +953,7 @@
 
         window.verifyPassword = function(callback) {
             if (currentUserLevel === 2) {
-                alert("عذراً، هذا الإجراء غير متاح لمستوى الصلاحية الحالي.");
+                alert("عذراً، هذا الإجراء غير متاح راجع مسئول مركز التوصيل");
                 return;
             }
             passwordCallback = callback;
@@ -982,7 +982,7 @@
 
         window.checkPasswordAndShowTab = function(tabName) {
             if (currentUserLevel === 2) {
-                alert("عذراً، صفحة سجل الحركات غير متاحة لمستوى الصلاحية الحالي.");
+                alert("عذراً، صفحة سجل الحركات غير متاحة راجع مسئول مركز التوصيل.");
                 return;
             }
             verifyPassword(() => {
@@ -1161,7 +1161,7 @@
         window.showTab = function(tabName) {
             if (currentUserLevel === 2) {
                 if (tabName === 'audit' || tabName === 'settings') {
-                    alert("عذراً، هذه الصفحة غير متاحة لمستوى الصلاحية الحالي.");
+                    alert("عذراً، هذه الصفحة غير متاحة راجع مسئول مركز التوصيل");
                     return;
                 }
             }
@@ -1353,7 +1353,7 @@
 
         window.openEditComplaint = function(id) {
             if (currentUserLevel === 2) {
-                alert("عذراً، لا يمكنك تعديل الشكاوى بحسب الصلاحيات الممنوحة.");
+                alert("عذراً، لا يمكنك تعديل الشكاوى راجع مسئول مركز التوصيل.");
                 return;
             }
             const c = window.complaints.find(x => x.id === id);
@@ -1417,7 +1417,7 @@
         window.saveEditedComplaint = async function(e) {
             e.preventDefault();
             if (currentUserLevel === 2) {
-                alert("عذراً، لا يمكنك حفظ التعديلات بحسب الصلاحيات الممنوحة.");
+                alert("عذراً، لا يمكنك حفظ التعديلات راجع مسئول مركز التوصيل.");
                 return;
             }
             const id = Number(document.getElementById('edit_c_id').value);
@@ -1448,7 +1448,7 @@
 
         window.deleteComplaint = async function(id) {
             if (currentUserLevel === 2) {
-                alert("عذراً، لا يمكنك حذف الشكاوى بحسب الصلاحيات الممنوحة.");
+                alert("عذراً، لا يمكنك حذف الشكاوى راجع مسئول مركز التوصيل.");
                 return;
             }
             if (!confirm('هل أنت متأكد من حذف هذه الشكوى؟')) return;
